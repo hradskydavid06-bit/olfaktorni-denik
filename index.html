@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="cs" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olfaktorní Deník | Luxusní Správce Parfémů</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        champagne: {
+                            50: '#FAF7F2',
+                            100: '#F3EDDF',
+                            200: '#E6C687',
+                            300: '#D4AF37',
+                            400: '#C5A059',
+                            500: '#B08B3E',
+                            900: '#3A2E12'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase App & Firestore SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+        /* Custom Gold Glows & Card Styles */
+        .gold-border-glow {
+            box-shadow: 0 0 15px -3px rgba(212, 175, 55, 0.12);
+        }
+        .gold-text-gradient {
+            background: linear-gradient(135deg, #F3EDDF 0%, #D4AF37 50%, #C5A059 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased min-h-screen flex flex-col selection:bg-amber-500/20 selection:text-amber-200">
+
+    <!-- TOP HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-zinc-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('sotd')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 to-zinc-900 border border-amber-500/30 flex items-center justify-center text-amber-300 shadow-inner">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-serif text-xl sm:text-2xl font-bold tracking-wide gold-text-gradient">Olfaktorní Deník</h1>
+                        <p class="text-[10px] uppercase tracking-widest text-zinc-400 font-medium">Luxusní Správce Parfémů</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Tabs -->
+                <nav class="hidden md:flex space-x-1 bg-zinc-900/90 p-1.5 rounded-2xl border border-zinc-800">
+                    <button onclick="switchTab('sotd')" id="tab-btn-sotd" class="nav-tab flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-amber-300 bg-zinc-800/90 shadow-sm border border-amber-500/20">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span>SOTD Log</span>
+                    </button>
+                    <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="nav-tab flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>Sbírka & Listy</span>
+                    </button>
+                    <button onclick="switchTab('advisor')" id="tab-btn-advisor" class="nav-tab flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50">
+                        <i data-lucide="compass" class="w-4 h-4"></i>
+                        <span>Inteligentní Rádce</span>
+                    </button>
+                </nav>
+
+                <!-- Status Badge (Storage mode / Sync) -->
+                <div class="hidden lg:flex items-center space-x-2 text-xs px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400" id="sync-status">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="sync-status-text">Lokální Úložiště</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Tabs -->
+        <div class="md:hidden border-t border-zinc-800/60 bg-zinc-900/90 px-4 py-2 flex justify-around">
+            <button onclick="switchTab('sotd')" id="mobile-tab-sotd" class="mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium text-amber-300">
+                <i data-lucide="calendar" class="w-5 h-5 mb-0.5"></i>
+                <span>SOTD</span>
+            </button>
+            <button onclick="switchTab('inventory')" id="mobile-tab-inventory" class="mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium text-zinc-400">
+                <i data-lucide="layers" class="w-5 h-5 mb-0.5"></i>
+                <span>Sbírka</span>
+            </button>
+            <button onclick="switchTab('advisor')" id="mobile-tab-advisor" class="mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium text-zinc-400">
+                <i data-lucide="compass" class="w-5 h-5 mb-0.5"></i>
+                <span>Rádce</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ==================== TAB 1: SOTD LOG (DENÍK) ==================== -->
+        <section id="tab-content-sotd" class="tab-page space-y-8">
+            
+            <!-- Hero / Header Section -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-950 p-6 rounded-2xl border border-zinc-800/80 shadow-xl">
+                <div>
+                    <h2 class="text-2xl font-serif font-bold text-zinc-100 flex items-center gap-2">
+                        <i data-lucide="bookmark" class="w-6 h-6 text-amber-400"></i>
+                        Scent of the Day (SOTD) Log
+                    </h2>
+                    <p class="text-sm text-zinc-400 mt-1">Zaznamenejte svou dnešní vůni, reakci okolí a meteorologické podmínky v Brně.</p>
+                </div>
+                
+                <!-- Weather Widget Preview -->
+                <div class="flex items-center space-x-3 bg-zinc-950/80 px-4 py-3 rounded-xl border border-zinc-800" id="weather-widget">
+                    <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-300" id="weather-icon-container">
+                        <i data-lucide="cloud-sun" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-zinc-400 flex items-center gap-1">
+                            <i data-lucide="map-pin" class="w-3 h-3 text-amber-400"></i> Brno, CZ
+                        </div>
+                        <div class="text-sm font-semibold text-zinc-200" id="weather-display">Načítání počasí...</div>
+                    </div>
+                    <button onclick="fetchBrnoWeather()" title="Obnovit počasí" class="p-1.5 text-zinc-400 hover:text-amber-300 transition-colors">
+                        <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- SOTD Input Form (7 cols) -->
+                <div class="lg:col-span-7 bg-zinc-900/80 rounded-2xl p-6 border border-zinc-800/80 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+                        <h3 class="text-lg font-semibold text-zinc-200 flex items-center gap-2">
+                            <i data-lucide="pen-tool" class="w-4 h-4 text-amber-400"></i> Nový Záznam Vůně
+                        </h3>
+                        <span class="text-xs text-amber-300/80 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20" id="sotd-date-badge">Dnes</span>
+                    </div>
+
+                    <form id="sotd-form" onsubmit="handleSaveSOTD(event)" class="space-y-6">
+                        
+                        <!-- Select Fragrance -->
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-zinc-400 mb-2 font-medium">Vyberte Parfém ze Sbírky</label>
+                            <select id="sotd-perfume-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 text-sm focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all">
+                                <!-- Populated dynamically by JS -->
+                            </select>
+                        </div>
+
+                        <!-- Weather & Temperature (Auto Filled) -->
+                        <div class="grid grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800/60">
+                            <div>
+                                <label class="block text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Teplota (°C)</label>
+                                <input type="text" id="sotd-temp" readonly class="w-full bg-transparent border-0 text-sm font-semibold text-amber-300 p-0 mt-1 focus:ring-0" value="Načítání...">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Stav Počasí</label>
+                                <input type="text" id="sotd-weather" readonly class="w-full bg-transparent border-0 text-sm font-semibold text-zinc-300 p-0 mt-1 focus:ring-0" value="Načítání...">
+                            </div>
+                        </div>
+
+                        <!-- 3 Sliders (0 - 10) -->
+                        <div class="space-y-5 bg-zinc-950/40 p-5 rounded-xl border border-zinc-800/60">
+                            
+                            <!-- Slider 1: Longevity -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-medium text-zinc-300 flex items-center gap-2">
+                                        <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i> Výdrž na kůži (Longevity)
+                                    </label>
+                                    <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" id="val-longevity">8 / 10</span>
+                                </div>
+                                <input type="range" id="slider-longevity" min="0" max="10" value="8" oninput="updateSliderVal('longevity')" class="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-400">
+                                <div class="flex justify-between text-[10px] text-zinc-500 mt-1">
+                                    <span>0 h (Slabá)</span>
+                                    <span>5 h (Průměr)</span>
+                                    <span>12+ h (Beastmode)</span>
+                                </div>
+                            </div>
+
+                            <!-- Slider 2: Sillage / Projection -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-medium text-zinc-300 flex items-center gap-2">
+                                        <i data-lucide="wifi" class="w-4 h-4 text-amber-400"></i> Projekce (Sillage)
+                                    </label>
+                                    <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" id="val-sillage">7 / 10</span>
+                                </div>
+                                <input type="range" id="slider-sillage" min="0" max="10" value="7" oninput="updateSliderVal('sillage')" class="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-400">
+                                <div class="flex justify-between text-[10px] text-zinc-500 mt-1">
+                                    <span>Těsně u kůže</span>
+                                    <span>Na délku paže</span>
+                                    <span>Zaplní místnost</span>
+                                </div>
+                            </div>
+
+                            <!-- Slider 3: Compliments / Reaction -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-medium text-zinc-300 flex items-center gap-2">
+                                        <i data-lucide="heart" class="w-4 h-4 text-amber-400"></i> Reakce okolí & Komplimenty
+                                    </label>
+                                    <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" id="val-reaction">9 / 10</span>
+                                </div>
+                                <input type="range" id="slider-reaction" min="0" max="10" value="9" oninput="updateSliderVal('reaction')" class="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-400">
+                                <div class="flex justify-between text-[10px] text-zinc-500 mt-1">
+                                    <span>Bez povšimnutí</span>
+                                    <span>Pozitivní ohlas</span>
+                                    <span>Středem pozornosti</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-zinc-400 mb-2 font-medium">Poznámka / Příležitost / Nálada</label>
+                            <textarea id="sotd-notes" rows="2" placeholder="Např. Pracovní schůzka v centru, výborný drydown v chladnějším odpoledni..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all"></textarea>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-amber-500/10 transition-all duration-200 flex items-center justify-center space-x-2">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            <span>Uložit Dnešní SOTD</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- SOTD History & Statistics (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Quick Stats Card -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800">
+                            <div class="text-xs text-zinc-400">Celkem Logů</div>
+                            <div class="text-2xl font-serif font-bold text-amber-300 mt-1" id="stat-total-logs">0</div>
+                        </div>
+                        <div class="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800">
+                            <div class="text-xs text-zinc-400">Nejčastější Vůně</div>
+                            <div class="text-sm font-semibold text-zinc-200 mt-1 truncate" id="stat-favorite-perfume">Zatím žádná</div>
+                        </div>
+                    </div>
+
+                    <!-- History Timeline -->
+                    <div class="bg-zinc-900/80 rounded-2xl p-6 border border-zinc-800/80 shadow-xl flex flex-col max-h-[520px]">
+                        <div class="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
+                            <h3 class="text-base font-semibold text-zinc-200 flex items-center gap-2">
+                                <i data-lucide="history" class="w-4 h-4 text-amber-400"></i> Historie Záznamů
+                            </h3>
+                            <button onclick="clearSOTDHistory()" class="text-[11px] text-zinc-500 hover:text-red-400 transition-colors">Vymazat vše</button>
+                        </div>
+                        
+                        <div id="sotd-history-list" class="overflow-y-auto space-y-4 pr-1 flex-1">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: INVENTÁŘ & BLACKLIST/WISHLIST ==================== -->
+        <section id="tab-content-inventory" class="tab-page hidden space-y-8">
+            
+            <!-- Filter Bar & Collection Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/80 p-6 rounded-2xl border border-zinc-800/80">
+                <div>
+                    <h2 class="text-2xl font-serif font-bold text-zinc-100 flex items-center gap-2">
+                        <i data-lucide="box" class="w-6 h-6 text-amber-400"></i>
+                        Moje Parfémová Sbírka
+                    </h2>
+                    <p class="text-sm text-zinc-400 mt-1">Kompletní přehled vašich Niche a Designer vůní.</p>
+                </div>
+
+                <!-- Collection Category Filter -->
+                <div class="flex items-center space-x-2 bg-zinc-950 p-1.5 rounded-xl border border-zinc-800">
+                    <button onclick="filterInventory('all')" id="inv-filter-all" class="inv-filter-btn px-4 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 text-amber-300 border border-amber-500/20">Všechny</button>
+                    <button onclick="filterInventory('niche')" id="inv-filter-niche" class="inv-filter-btn px-4 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200">Niche</button>
+                    <button onclick="filterInventory('designer')" id="inv-filter-designer" class="inv-filter-btn px-4 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200">Designer</button>
+                </div>
+            </div>
+
+            <!-- Collection Grid -->
+            <div id="inventory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically by JS -->
+            </div>
+
+            <!-- WISHLIST & BLACKLIST SECTIONS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-zinc-800/80">
+                
+                <!-- WISHLIST -->
+                <div class="bg-zinc-900/80 rounded-2xl p-6 border border-zinc-800/80 space-y-6">
+                    <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+                        <div>
+                            <h3 class="text-lg font-serif font-bold text-amber-300 flex items-center gap-2">
+                                <i data-lucide="star" class="w-5 h-5 text-amber-400"></i> Wishlist (Seznam Přání)
+                            </h3>
+                            <p class="text-xs text-zinc-400">Parfémy, které plánujete vyzkoušet nebo pořídit.</p>
+                        </div>
+                        <button onclick="openAddWishlistModal()" class="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Přidat
+                        </button>
+                    </div>
+
+                    <div id="wishlist-container" class="space-y-3">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+
+                <!-- BLACKLIST -->
+                <div class="bg-zinc-900/80 rounded-2xl p-6 border border-zinc-800/80 space-y-6">
+                    <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+                        <div>
+                            <h3 class="text-lg font-serif font-bold text-red-400 flex items-center gap-2">
+                                <i data-lucide="shield-alert" class="w-5 h-5 text-red-400"></i> Blacklist (Zablokované)
+                            </h3>
+                            <p class="text-xs text-zinc-400">Vůně, kterým se chcete definitivně vyhnout.</p>
+                        </div>
+                        <button onclick="openAddBlacklistModal()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl text-xs font-medium flex items-center gap-1 transition-all">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Přidat
+                        </button>
+                    </div>
+
+                    <div id="blacklist-container" class="space-y-3">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: INTELIGENTNÍ RÁDCE (ESPRESSO KOMPAS) ==================== -->
+        <section id="tab-content-advisor" class="tab-page hidden space-y-8">
+            
+            <div class="bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-950 p-6 rounded-2xl border border-zinc-800/80 shadow-xl">
+                <h2 class="text-2xl font-serif font-bold text-zinc-100 flex items-center gap-2">
+                    <i data-lucide="compass" class="w-6 h-6 text-amber-400"></i>
+                    Inteligentní Olfaktorní Rádce
+                </h2>
+                <p class="text-sm text-zinc-400 mt-1">Odpovězte na 3 rychlé otázky a náš algoritmus vám vybere ideální vůni z vaší sbírky pro dnešní příležitost.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Questions Form (5 cols) -->
+                <div class="lg:col-span-5 bg-zinc-900/80 rounded-2xl p-6 border border-zinc-800/80 shadow-xl space-y-6">
+                    <h3 class="text-base font-semibold text-zinc-200 border-b border-zinc-800 pb-3 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4 text-amber-400"></i> Parametry Příležitosti
+                    </h3>
+
+                    <form id="advisor-form" onsubmit="calculateRecommendation(event)" class="space-y-5">
+                        
+                        <!-- Question 1 -->
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-amber-300/90 font-medium mb-2">1. Kam se chystáš?</label>
+                            <select id="adv-q1" onchange="liveAdvisorCalculate()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 text-sm focus:outline-none focus:border-amber-500/50">
+                                <option value="office">Kancelář / Pracovní schůzka</option>
+                                <option value="date">Rande / Romantická večeře</option>
+                                <option value="leisure">Volný čas / Procházka městem</option>
+                                <option value="gym">Posilovna / Sportovní aktivity</option>
+                                <option value="evening">Večerní akce / Klub / Párty</option>
+                                <option value="formal">Slavnostní / Formální Událost</option>
+                            </select>
+                        </div>
+
+                        <!-- Question 2 -->
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-amber-300/90 font-medium mb-2">2. Jaké je počasí?</label>
+                            <select id="adv-q2" onchange="liveAdvisorCalculate()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 text-sm focus:outline-none focus:border-amber-500/50">
+                                <option value="summer">Horké léto (> 25°C)</option>
+                                <option value="spring">Příjemné jaro / podzim (12-25°C)</option>
+                                <option value="winter">Chladná zima (< 12°C)</option>
+                                <option value="rain">Deštivo / Sychravo</option>
+                            </select>
+                        </div>
+
+                        <!-- Question 3 -->
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-amber-300/90 font-medium mb-2">3. Jaký chceš zanechat dojem?</label>
+                            <select id="adv-q3" onchange="liveAdvisorCalculate()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 text-sm focus:outline-none focus:border-amber-500/50">
+                                <option value="clean">Čistý & Svěží</option>
+                                <option value="dark">Temný & Záhadný</option>
+                                <option value="sweet">Sladký & Lákavý</option>
+                                <option value="professional">Profesionální & Elegantní</option>
+                                <option value="dominant">Výrazný & Dominantní</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            <span>Vyhodnotit Doporučení</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Recommendation Output Display (7 cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div id="advisor-results" class="space-y-6">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL FOR ADDING WISHLIST ITEM -->
+    <div id="wishlist-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-lg font-serif font-bold text-amber-300">Přidat Parfém na Wishlist</h3>
+                <button onclick="closeWishlistModal()" class="text-zinc-500 hover:text-zinc-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleSaveWishlist(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Značka & Název Parfému</label>
+                    <input type="text" id="wl-name" required placeholder="např. Creed Royal Oud" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-amber-500/50">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Důvod / Vibe</label>
+                    <input type="text" id="wl-note" placeholder="např. Ušlechtilé dřevité tóny na podzim..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-amber-500/50">
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeWishlistModal()" class="px-4 py-2 text-xs text-zinc-400 hover:text-zinc-200">Zrušit</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-500 text-zinc-950 font-semibold rounded-xl text-xs">Uložit na Wishlist</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FOR ADDING BLACKLIST ITEM -->
+    <div id="blacklist-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-lg font-serif font-bold text-red-400">Přidat Parfém na Blacklist</h3>
+                <button onclick="closeBlacklistModal()" class="text-zinc-500 hover:text-zinc-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleSaveBlacklist(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Značka & Název Parfému</label>
+                    <input type="text" id="bl-name" required placeholder="např. Dior Sauvage EDT" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-red-500/50">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Důvod Zablokování</label>
+                    <input type="text" id="bl-reason" required placeholder="např. Příliš masová, ostrá syntetika..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-red-500/50">
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeBlacklistModal()" class="px-4 py-2 text-xs text-zinc-400 hover:text-zinc-200">Zrušit</button>
+                    <button type="submit" class="px-4 py-2 bg-red-500 text-zinc-950 font-semibold rounded-xl text-xs">Přidat na Blacklist</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-zinc-900 bg-zinc-950 py-8 text-center text-xs text-zinc-600 mt-12">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-2">
+                <span class="font-serif font-bold text-amber-500/80">Olfaktorní Deník</span>
+                <span>&copy; 2026</span>
+            </div>
+            <p>Osobní Niche & Designer Fragrance Curator & SOTD Companion</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        /* ==========================================================================
+           1. HARDCODED PERFUME COLLECTION DATASET
+           ========================================================================== */
+        const PERFUMES_DATA = [
+            // --- NICHE (11) ---
+            {
+                id: 'reflection-man',
+                brand: 'Amouage',
+                name: 'Reflection Man',
+                type: 'Niche',
+                notes: ['Orris', 'Neroli', 'Cedarwood', 'Sandalwood'],
+                seasons: ['Spring', 'Summer', 'Autumn', 'All-year'],
+                vibes: ['clean', 'professional', 'formal', 'office'],
+                longevity: 9,
+                sillage: 8,
+                desc: 'Sofistikovaná, květinově-dřevitá ikona čistoty a elegance.',
+                favOccasion: 'Kancelář & Formální schůzky'
+            },
+            {
+                id: 'the-hedonist',
+                brand: 'Ex Nihilo',
+                name: 'The Hedonist',
+                type: 'Niche',
+                notes: ['Akigalawood', 'Bergamot', 'Cedar', 'Ginger'],
+                seasons: ['Spring', 'Autumn', 'All-year'],
+                vibes: ['professional', 'clean', 'office', 'leisure'],
+                longevity: 8,
+                sillage: 7,
+                desc: 'Moderní molekulární elegance s řízným dřevitým akordem.',
+                favOccasion: 'Kancelář & Všední den'
+            },
+            {
+                id: 'vanille-havane',
+                brand: 'Anatole Lebreton',
+                name: 'Vanille Havane',
+                type: 'Niche',
+                notes: ['Tobacco', 'Rum', 'Vanilla', 'Cacao', 'Dried Fruits'],
+                seasons: ['Autumn', 'Winter'],
+                vibes: ['dark', 'sweet', 'date', 'evening'],
+                longevity: 10,
+                sillage: 9,
+                desc: 'Opulentní gurmánský tabák s rumem a temnou vanilkou.',
+                favOccasion: 'Rande & Chladné večery'
+            },
+            {
+                id: 'midsummer-dream',
+                brand: 'Roja Parfums',
+                name: 'The Midsummer Dream',
+                type: 'Niche',
+                notes: ['Grapefruit', 'Elemi', 'Orange Blossom', 'Resins'],
+                seasons: ['Spring', 'Summer'],
+                vibes: ['clean', 'sweet', 'leisure', 'date'],
+                longevity: 8,
+                sillage: 7,
+                desc: 'Snová, romantická citrusově-rezinózní kompozice.',
+                favOccasion: 'Slunečné dny & Procházky'
+            },
+            {
+                id: 'winter-palace',
+                brand: 'Memo Paris',
+                name: 'Winter Palace',
+                type: 'Niche',
+                notes: ['Red Tea', 'Bergamot', 'Amber', 'Vanilla', 'Tonka'],
+                seasons: ['Autumn', 'Winter', 'Spring'],
+                vibes: ['dark', 'sweet', 'leisure'],
+                longevity: 8,
+                sillage: 8,
+                desc: 'Hřejivá symfonie červeného čaje, citrusů a ambry.',
+                favOccasion: 'Odpolední relaxace & Chladnější dny'
+            },
+            {
+                id: 'odeon',
+                brand: 'Memo Paris',
+                name: 'Odéon',
+                type: 'Niche',
+                notes: ['Rose', 'Dates', 'Cardamom', 'Amberwood'],
+                seasons: ['Autumn', 'Winter'],
+                vibes: ['dark', 'sweet', 'evening', 'formal'],
+                longevity: 9,
+                sillage: 8,
+                desc: 'Luxusní orientální růže se sladkými datlemi a kořením.',
+                favOccasion: 'Večerní události & Divadlo'
+            },
+            {
+                id: 'ingenious-ginger',
+                brand: 'Goldfield & Banks',
+                name: 'Ingenious Ginger',
+                type: 'Niche',
+                notes: ['Australian Ginger', 'Mandarin', 'Magnolia', 'Amber'],
+                seasons: ['Spring', 'Summer'],
+                vibes: ['clean', 'gym', 'leisure'],
+                longevity: 7,
+                sillage: 7,
+                desc: 'Jiskřivý, osvěžující australský zázvor s citrusovým náběhem.',
+                favOccasion: 'Horké léto & Sport'
+            },
+            {
+                id: 'sugar-leather',
+                brand: 'Une Nuit Nomade',
+                name: 'Sugar Leather',
+                type: 'Niche',
+                notes: ['Caramel', 'Leather', 'Labdanum', 'Cinnamon'],
+                seasons: ['Autumn', 'Winter'],
+                vibes: ['sweet', 'dark', 'date'],
+                longevity: 9,
+                sillage: 8,
+                desc: 'Sametově sladká kůže s karamelem a hřejivým kořením.',
+                favOccasion: 'Zimní večery & Romantika'
+            },
+            {
+                id: 'baraonda',
+                brand: 'Nasomatto',
+                name: 'Baraonda',
+                type: 'Niche',
+                notes: ['Whiskey', 'Wooden Barrel', 'Ambrette', 'Rose'],
+                seasons: ['Autumn', 'Winter'],
+                vibes: ['dark', 'dominant', 'evening', 'date'],
+                longevity: 10,
+                sillage: 9,
+                desc: 'Mystická nálož drahého single malt whiskey a sudového dřeva.',
+                favOccasion: 'Klub, Bar & Vyzývavé večery'
+            },
+            {
+                id: 'the-musc',
+                brand: 'Essential Parfums',
+                name: 'The Musc',
+                type: 'Niche',
+                notes: ['Honeyed Musk', 'Lavender', 'Sandalwood', 'Ginger'],
+                seasons: ['All-year', 'Spring', 'Summer'],
+                vibes: ['clean', 'office', 'leisure'],
+                longevity: 7,
+                sillage: 6,
+                desc: 'Krémově jemné pižmo s medovým dotekem a levandulí.',
+                favOccasion: 'Denní nošení & Kancelář'
+            },
+            {
+                id: 'clive-1872',
+                brand: 'Clive Christian',
+                name: '1872 Masculine',
+                type: 'Niche',
+                notes: ['Petitgrain', 'Clary Sage', 'Citrus', 'Cedarwood'],
+                seasons: ['Spring', 'Summer', 'Autumn'],
+                vibes: ['clean', 'professional', 'formal', 'dominant'],
+                longevity: 9,
+                sillage: 8,
+                desc: 'Královská aristo-citrusová klasika s neuvěřitelnou hloubkou.',
+                favOccasion: 'Exkluzivní obchodní jednání'
+            },
+
+            // --- DESIGNER (6) ---
+            {
+                id: 'casablanca',
+                brand: 'Swiss Arabian',
+                name: 'Essence of Casablanca',
+                type: 'Designer',
+                notes: ['Ripe Apple', 'Grapes', 'Patchouli', 'Suede'],
+                seasons: ['Autumn', 'Winter', 'Spring'],
+                vibes: ['sweet', 'leisure'],
+                longevity: 8,
+                sillage: 8,
+                desc: 'Šťavnaté jablko a hrozny na sladkém semišovém základu.',
+                favOccasion: 'Pohodový volný čas'
+            },
+            {
+                id: 'turathi-electric',
+                brand: 'Afnan',
+                name: 'Turathi Electric',
+                type: 'Designer',
+                notes: ['Electric Citrus', 'Aquatic Notes', 'Musk'],
+                seasons: ['Spring', 'Summer'],
+                vibes: ['clean', 'gym', 'leisure'],
+                longevity: 7,
+                sillage: 7,
+                desc: 'Energický citrusovo-akvatický náboj pro aktivní dny.',
+                favOccasion: 'Posilovna & Léto'
+            },
+            {
+                id: 'yellow-dream',
+                brand: 'Valentino',
+                name: 'Born in Roma Yellow Dream',
+                type: 'Designer',
+                notes: ['Pineapple', 'Gingerbread', 'Vanilla'],
+                seasons: ['Spring', 'Summer', 'Autumn'],
+                vibes: ['sweet', 'leisure', 'date'],
+                longevity: 8,
+                sillage: 7,
+                desc: 'Hravý ananas s perníkovým kořením a svěžím nádechem.',
+                favOccasion: 'Rande & Letní večery'
+            },
+
+            {
+                id: 'supremacy-collectors',
+                brand: 'Afnan',
+                name: 'Supremacy Collector\'s Edition',
+                type: 'Designer',
+                notes: ['Pineapple', 'Birch', 'Oakmoss', 'Apple'],
+                seasons: ['All-year'],
+                vibes: ['dominant', 'professional', 'office'],
+                longevity: 9,
+                sillage: 9,
+                desc: 'Výrazný ovocně-kouřový profil s obrovskou projekcí.',
+                favOccasion: 'Zanechání silného dojmu'
+            },
+            {
+                id: 'liquid-brun',
+                brand: 'French Avenue',
+                name: 'Liquid Brun',
+                type: 'Designer',
+                notes: ['Bourbon Vanilla', 'Cinnamon', 'Praline', 'Ambroxan'],
+                seasons: ['Autumn', 'Winter'],
+                vibes: ['sweet', 'date', 'evening'],
+                longevity: 9,
+                sillage: 9,
+                desc: 'Neodolatelná skořicovo-vanilková gourmand bomba.',
+                favOccasion: 'Chladné večery & Párty'
+            },
+            {
+                id: 'rare-reef',
+                brand: 'Afnan',
+                name: 'Rare Reef',
+                type: 'Designer',
+                notes: ['Sea Salt', 'Driftwood', 'Ocean Breeze'],
+                seasons: ['Summer'],
+                vibes: ['clean', 'gym', 'leisure'],
+                longevity: 6,
+                sillage: 6,
+                desc: 'Svěží mořský vánek s minerálním dřevitým tónem.',
+                favOccasion: 'Horké plážové dny'
+            }
+        ];
+
+        /* ==========================================================================
+           2. INITIAL WISHLIST & BLACKLIST DATA
+           ========================================================================== */
+        let wishlistData = [
+            { id: 'wl-1', name: 'Creed Royal Oud', note: 'Ušlechtilé cedrové a oudové dřevo na podzim' },
+            { id: 'wl-2', name: 'Xerjoff Naxos', note: 'Sladký med, tabák a bergamot ze Sicílie' },
+            { id: 'wl-3', name: 'Initio Side Effect', note: 'Rum, vanilka, skořice a hedvábné pižmo' }
+        ];
+
+        let blacklistData = [
+            { id: 'bl-1', name: 'Dior Sauvage EDT', reason: 'Příliš masová, ostrá kovově-syntetická ostrost' },
+            { id: 'bl-2', name: 'Paco Rabanne 1 Million EDT', reason: 'Křiklavá, přeslazená syntetika bez hloubky' },
+            { id: 'bl-3', name: 'Rabanne Invictus', reason: 'Extrémně sladký bublinkový akord' }
+        ];
+
+        let sotdHistory = [];
+        let activeInventoryFilter = 'all';
+
+        /* ==========================================================================
+           3. FIREBASE SETUP & INITIALIZATION TEMPLATE
+           ========================================================================== */
+        // SEM VLOŽTE VAŠE FIREBASE KONFIGURAČNÍ KLÍČE (POKUDA CHCETE POUŽÍVAT CLOUD FIRESTORE)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMYlablJox9g01gG5ugvjFTj_X3VmQhWo",
+            authDomain: "olfaktorni-denik.firebaseapp.com",
+            projectId: "olfaktorni-denik",
+            storageBucket: "olfaktorni-denik.firebasestorage.app",
+            messagingSenderId: "844330881563",
+            appId: "1:844330881563:web:a851d037059501b08b1ebe",
+            measurementId: "G-F1BE37YF5D"
+        };
+
+        let db = null;
+        let isFirebaseConnected = false;
+
+        function initFirebase() {
+            try {
+                if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.firestore();
+                    isFirebaseConnected = true;
+                    document.getElementById('sync-status-text').innerText = 'Firebase Connected';
+                    document.getElementById('sync-status').classList.remove('border-zinc-800');
+                    document.getElementById('sync-status').classList.add('border-emerald-500/40', 'text-emerald-300');
+                    console.log("Firebase Firestore initialized successfully.");
+                    loadSOTDFromFirestore();
+                } else {
+                    console.log("Using LocalStorage mode (Firebase keys not provided).");
+                    loadSOTDFromLocalStorage();
+                }
+            } catch (err) {
+                console.warn("Firebase initialization skipped, defaulting to LocalStorage:", err);
+                loadSOTDFromLocalStorage();
+            }
+        }
+
+        /* ==========================================================================
+           4. WEATHER API INTEGRATION (Open-Meteo for Brno)
+           ========================================================================== */
+        let currentWeatherData = { temp: '19.5', condition: 'Polojasno' };
+
+        async function fetchBrnoWeather() {
+            const tempInput = document.getElementById('sotd-temp');
+            const weatherInput = document.getElementById('sotd-weather');
+            const displayEl = document.getElementById('weather-display');
+
+            if (tempInput) tempInput.value = "Načítání...";
+            if (weatherInput) weatherInput.value = "Načítání...";
+            if (displayEl) displayEl.innerText = "Aktualizace...";
+
+            try {
+                // Coordinates for Brno: Lat 49.1951, Lon 16.6068
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=49.1951&longitude=16.6068&current_weather=true');
+                const data = await res.json();
+                
+                if (data && data.current_weather) {
+                    const temp = data.current_weather.temperature;
+                    const code = data.current_weather.weathercode;
+                    const condition = decodeWeatherCode(code);
+
+                    currentWeatherData = { temp: `${temp}`, condition };
+
+                    if (tempInput) tempInput.value = `${temp} °C`;
+                    if (weatherInput) weatherInput.value = condition;
+                    if (displayEl) displayEl.innerText = `${temp}°C, ${condition}`;
+                }
+            } catch (e) {
+                console.warn("Meteo API fallback activated:", e);
+                currentWeatherData = { temp: '18.0', condition: 'Příjemně' };
+                if (tempInput) tempInput.value = "18.0 °C";
+                if (weatherInput) weatherInput.value = "Příjemně";
+                if (displayEl) displayEl.innerText = "18.0°C, Brno";
+            }
+        }
+
+        function decodeWeatherCode(code) {
+            if (code === 0) return 'Jasno / Slunečno';
+            if (code >= 1 && code <= 3) return 'Polojasno';
+            if (code >= 45 && code <= 48) return 'Mlha';
+            if (code >= 51 && code <= 67) return 'Déšť / Mrholení';
+            if (code >= 71 && code <= 77) return 'Sněžení';
+            if (code >= 80 && code <= 82) return 'Přeháňky';
+            if (code >= 95) return 'Bouřka';
+            return 'Oblačno';
+        }
+
+        /* ==========================================================================
+           5. TAB SWITCHING LOGIC
+           ========================================================================== */
+        function switchTab(tabName) {
+            // Hide all pages
+            document.querySelectorAll('.tab-page').forEach(page => page.classList.add('hidden'));
+            
+            // Reset nav styles
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.className = "nav-tab flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50";
+            });
+            document.querySelectorAll('.mobile-nav-tab').forEach(btn => {
+                btn.className = "mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium text-zinc-400";
+            });
+
+            // Show selected page
+            const activePage = document.getElementById(`tab-content-${tabName}`);
+            if (activePage) activePage.classList.remove('hidden');
+
+            // Highlight selected tab
+            const desktopBtn = document.getElementById(`tab-btn-${tabName}`);
+            if (desktopBtn) {
+                desktopBtn.className = "nav-tab flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-amber-300 bg-zinc-800/90 shadow-sm border border-amber-500/20";
+            }
+            const mobileBtn = document.getElementById(`mobile-tab-${tabName}`);
+            if (mobileBtn) {
+                mobileBtn.className = "mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-lg text-xs font-medium text-amber-300";
+            }
+
+            if (tabName === 'sotd') {
+                renderSOTDSelectOptions();
+            } else if (tabName === 'inventory') {
+                renderInventoryGrid();
+                renderWishlist();
+                renderBlacklist();
+            } else if (tabName === 'advisor') {
+                liveAdvisorCalculate();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ==========================================================================
+           6. SOTD LOGIC & RENDER
+           ========================================================================== */
+        function updateSliderVal(type) {
+            const slider = document.getElementById(`slider-${type}`);
+            const display = document.getElementById(`val-${type}`);
+            if (slider && display) {
+                display.innerText = `${slider.value} / 10`;
+            }
+        }
+
+        function renderSOTDSelectOptions() {
+            const select = document.getElementById('sotd-perfume-select');
+            if (!select) return;
+
+            let html = '<optgroup label="Niche Parfémy">';
+            PERFUMES_DATA.filter(p => p.type === 'Niche').forEach(p => {
+                html += `<option value="${p.id}">${p.brand} - ${p.name}</option>`;
+            });
+            html += '</optgroup><optgroup label="Designer Parfémy">';
+            PERFUMES_DATA.filter(p => p.type === 'Designer').forEach(p => {
+                html += `<option value="${p.id}">${p.brand} - ${p.name}</option>`;
+            });
+            html += '</optgroup>';
+
+            select.innerHTML = html;
+        }
+
+        function handleSaveSOTD(e) {
+            e.preventDefault();
+            const perfumeId = document.getElementById('sotd-perfume-select').value;
+            const perfume = PERFUMES_DATA.find(p => p.id === perfumeId);
+
+            if (!perfume) return;
+
+            const entry = {
+                id: 'sotd-' + Date.now(),
+                timestamp: new Date().toISOString(),
+                dateStr: new Date().toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }),
+                perfumeId: perfume.id,
+                brand: perfume.brand,
+                name: perfume.name,
+                type: perfume.type,
+                temp: document.getElementById('sotd-temp').value,
+                weather: document.getElementById('sotd-weather').value,
+                longevity: document.getElementById('slider-longevity').value,
+                sillage: document.getElementById('slider-sillage').value,
+                reaction: document.getElementById('slider-reaction').value,
+                notes: document.getElementById('sotd-notes').value.trim()
+            };
+
+            sotdHistory.unshift(entry);
+            saveSOTDData();
+            renderSOTDHistory();
+            
+            // Reset form notes
+            document.getElementById('sotd-notes').value = '';
+            
+            // Toast feedback
+            showToast(`Uloženo! Dnešní Vůně: ${perfume.name}`);
+        }
+
+        function saveSOTDData() {
+            localStorage.setItem('olfaktor_sotd_history', JSON.stringify(sotdHistory));
+            if (isFirebaseConnected && db && sotdHistory.length > 0 && sotdHistory[0]) {
+                try {
+                    db.collection('sotd_logs').doc(sotdHistory[0].id).set(sotdHistory[0]);
+                } catch(err) {
+                    console.error("Firestore Save Error:", err);
+                }
+            }
+        }
+
+        function loadSOTDFromLocalStorage() {
+            const saved = localStorage.getItem('olfaktor_sotd_history');
+            if (saved) {
+                try { sotdHistory = JSON.parse(saved); } catch(e){ sotdHistory = []; }
+            }
+            if (!sotdHistory || sotdHistory.length === 0) {
+                sotdHistory = [{
+                    id: 'sotd-init',
+                    timestamp: new Date().toISOString(),
+                    dateStr: 'Dnes',
+                    perfumeId: 'reflection-man',
+                    brand: 'Amouage',
+                    name: 'Reflection Man',
+                    type: 'Niche',
+                    temp: '21.5 °C',
+                    weather: 'Slunečno',
+                    longevity: '9',
+                    sillage: '8',
+                    reaction: '9',
+                    notes: 'Skvělá projekce v kanceláři, pozitivní ohlasy kolegů.'
+                }];
+                localStorage.setItem('olfaktor_sotd_history', JSON.stringify(sotdHistory));
+            }
+            renderSOTDHistory();
+        }
+
+        function loadSOTDFromFirestore() {
+            if (!db) {
+                loadSOTDFromLocalStorage();
+                return;
+            }
+            db.collection('sotd_logs').get().then(snapshot => {
+                const logs = [];
+                snapshot.forEach(doc => logs.push(doc.data()));
+                if (logs.length > 0) {
+                    logs.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                    sotdHistory = logs;
+                    localStorage.setItem('olfaktor_sotd_history', JSON.stringify(sotdHistory));
+                    renderSOTDHistory();
+                } else {
+                    loadSOTDFromLocalStorage();
+                }
+            }).catch(err => {
+                console.warn("Firestore fetch error, falling back to local:", err);
+                loadSOTDFromLocalStorage();
+            });
+        }
+                loadSOTDFromLocalStorage();
+            });
+        }
+
+        function renderSOTDHistory() {
+            const container = document.getElementById('sotd-history-list');
+            const totalEl = document.getElementById('stat-total-logs');
+            const favEl = document.getElementById('stat-favorite-perfume');
+            
+            if (!container) return;
+
+            if (totalEl) totalEl.innerText = sotdHistory.length;
+
+            // Calculate favorite perfume
+            if (sotdHistory.length > 0) {
+                const counts = {};
+                sotdHistory.forEach(item => {
+                    counts[item.name] = (counts[item.name] || 0) + 1;
+                });
+                const favName = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+                if (favEl) favEl.innerText = favName;
+            } else {
+                if (favEl) favEl.innerText = 'Zatím žádná';
+            }
+
+            if (sotdHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-zinc-500 text-xs">
+                        <i data-lucide="book-open" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+                        Zatím nemáte žádné uložené záznamy SOTD.
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '';
+            sotdHistory.forEach((item) => {
+                html += `
+                    <div class="bg-zinc-950/80 p-4 rounded-xl border border-zinc-800/80 space-y-3 relative group hover:border-amber-500/30 transition-all">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${item.type === 'Niche' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'bg-blue-500/10 text-blue-300 border border-blue-500/30'}">${item.type}</span>
+                                    <span class="text-xs text-zinc-500">${item.dateStr}</span>
+                                </div>
+                                <h4 class="text-base font-serif font-bold text-zinc-100 mt-1">${item.brand} - ${item.name}</h4>
+                            </div>
+                            <button onclick="deleteSOTDEntry('${item.id}')" class="text-zinc-600 hover:text-red-400 transition-colors p-1" title="Smazat">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-3 text-xs text-zinc-400 bg-zinc-900/60 px-3 py-1.5 rounded-lg border border-zinc-800/50">
+                            <span class="flex items-center gap-1 text-amber-300"><i data-lucide="thermometer" class="w-3.5 h-3.5"></i> ${item.temp}</span>
+                            <span>•</span>
+                            <span>${item.weather}</span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                            <div class="bg-zinc-900 p-1.5 rounded border border-zinc-800">
+                                <div class="text-zinc-500">Výdrž</div>
+                                <div class="font-bold text-amber-400">${item.longevity}/10</div>
+                            </div>
+                            <div class="bg-zinc-900 p-1.5 rounded border border-zinc-800">
+                                <div class="text-zinc-500">Projekce</div>
+                                <div class="font-bold text-amber-400">${item.sillage}/10</div>
+                            </div>
+                            <div class="bg-zinc-900 p-1.5 rounded border border-zinc-800">
+                                <div class="text-zinc-500">Okolí</div>
+                                <div class="font-bold text-amber-400">${item.reaction}/10</div>
+                            </div>
+                        </div>
+
+                        ${item.notes ? `<p class="text-xs text-zinc-300 italic bg-zinc-900/40 p-2 rounded border border-zinc-800/40">"${item.notes}"</p>` : ''}
+                    </div>`;
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function deleteSOTDEntry(id) {
+            sotdHistory = sotdHistory.filter(i => i.id !== id);
+            saveSOTDData();
+            renderSOTDHistory();
+            showToast('Záznam byl smazán.');
+        }
+
+        function clearSOTDHistory() {
+            if (confirm('Opravdu chcete vymazat celou historii SOTD?')) {
+                sotdHistory = [];
+                saveSOTDData();
+                renderSOTDHistory();
+                showToast('Historie byla vymazána.');
+            }
+        }
+
+        /* ==========================================================================
+           7. INVENTORY & COLLECTION RENDER
+           ========================================================================== */
+        function filterInventory(category) {
+            activeInventoryFilter = category;
+            document.querySelectorAll('.inv-filter-btn').forEach(b => {
+                b.className = 'inv-filter-btn px-4 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200';
+            });
+            const activeBtn = document.getElementById(`inv-filter-${category}`);
+            if (activeBtn) {
+                activeBtn.className = 'inv-filter-btn px-4 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 text-amber-300 border border-amber-500/20';
+            }
+            renderInventoryGrid();
+        }
+
+        function renderInventoryGrid() {
+            const grid = document.getElementById('inventory-grid');
+            if (!grid) return;
+
+            let filtered = PERFUMES_DATA;
+            if (activeInventoryFilter === 'niche') filtered = PERFUMES_DATA.filter(p => p.type === 'Niche');
+            if (activeInventoryFilter === 'designer') filtered = PERFUMES_DATA.filter(p => p.type === 'Designer');
+
+            let html = '';
+            filtered.forEach(p => {
+                const notesTags = p.notes.map(n => `<span class="px-2 py-0.5 bg-zinc-800 text-zinc-300 text-[10px] rounded border border-zinc-700/50">${n}</span>`).join(' ');
+                
+                html += `
+                    <div class="bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800/80 hover:border-amber-500/30 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-lg">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${p.type === 'Niche' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'bg-blue-500/10 text-blue-300 border border-blue-500/30'}">${p.type}</span>
+                                <div class="flex items-center space-x-1 text-xs text-amber-400">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
+                                    <span class="font-bold">${p.longevity}</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <h4 class="text-xs uppercase tracking-widest text-zinc-500 font-semibold">${p.brand}</h4>
+                                <h3 class="text-lg font-serif font-bold text-zinc-100 mt-0.5 group-hover:text-amber-300 transition-colors">${p.name}</h3>
+                            </div>
+
+                            <p class="text-xs text-zinc-400 mt-2 line-clamp-2">${p.desc}</p>
+
+                            <div class="mt-4 flex flex-wrap gap-1.5">
+                                ${notesTags}
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-zinc-800/80 flex items-center justify-between">
+                            <div class="text-[11px] text-zinc-500">
+                                <i data-lucide="map-pin" class="w-3 h-3 inline mr-1 text-amber-400"></i>${p.favOccasion}
+                            </div>
+                            <button onclick="quickSelectSOTD('${p.id}')" class="px-3 py-1.5 bg-zinc-800 hover:bg-amber-500 hover:text-zinc-950 text-amber-300 rounded-xl text-xs font-medium border border-zinc-700/60 transition-all flex items-center gap-1">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> SOTD
+                            </button>
+                        </div>
+                    </div>`;
+            });
+
+            grid.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function quickSelectSOTD(perfumeId) {
+            switchTab('sotd');
+            const select = document.getElementById('sotd-perfume-select');
+            if (select) {
+                select.value = perfumeId;
+                select.classList.add('ring-2', 'ring-amber-400');
+                setTimeout(() => select.classList.remove('ring-2', 'ring-amber-400'), 1500);
+            }
+        }
+
+        /* ==========================================================================
+           8. WISHLIST & BLACKLIST LOGIC
+           ========================================================================== */
+        function renderWishlist() {
+            const container = document.getElementById('wishlist-container');
+            if (!container) return;
+
+            if (wishlistData.length === 0) {
+                container.innerHTML = '<div class="text-xs text-zinc-500 py-3 text-center">Wishlist je prázdný.</div>';
+                return;
+            }
+
+            let html = '';
+            wishlistData.forEach(item => {
+                html += `
+                    <div class="bg-zinc-950/80 p-3.5 rounded-xl border border-zinc-800/80 flex items-center justify-between group">
+                        <div>
+                            <div class="text-sm font-semibold text-zinc-200">${item.name}</div>
+                            ${item.note ? `<div class="text-xs text-zinc-400 mt-0.5">${item.note}</div>` : ''}
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="moveToCollection('${item.id}', '${item.name}')" title="Přesunout do sbírky" class="p-1.5 text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="removeWishlistItem('${item.id}')" title="Odstranit" class="p-1.5 text-zinc-600 hover:text-red-400 rounded-lg transition-colors">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderBlacklist() {
+            const container = document.getElementById('blacklist-container');
+            if (!container) return;
+
+            if (blacklistData.length === 0) {
+                container.innerHTML = '<div class="text-xs text-zinc-500 py-3 text-center">Blacklist je prázdný.</div>';
+                return;
+            }
+
+            let html = '';
+            blacklistData.forEach(item => {
+                html += `
+                    <div class="bg-zinc-950/80 p-3.5 rounded-xl border border-red-900/30 flex items-center justify-between group">
+                        <div>
+                            <div class="text-sm font-semibold text-red-200">${item.name}</div>
+                            <div class="text-xs text-red-400/70 mt-0.5">${item.reason}</div>
+                        </div>
+                        <button onclick="removeBlacklistItem('${item.id}')" title="Odstranit" class="p-1.5 text-zinc-600 hover:text-red-400 rounded-lg transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>`;
+            });
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function openAddWishlistModal() { document.getElementById('wishlist-modal').classList.remove('hidden'); }
+        function closeWishlistModal() { document.getElementById('wishlist-modal').classList.add('hidden'); }
+        function openAddBlacklistModal() { document.getElementById('blacklist-modal').classList.remove('hidden'); }
+        function closeBlacklistModal() { document.getElementById('blacklist-modal').classList.add('hidden'); }
+
+        function handleSaveWishlist(e) {
+            e.preventDefault();
+            const name = document.getElementById('wl-name').value.trim();
+            const note = document.getElementById('wl-note').value.trim();
+            if (name) {
+                wishlistData.push({ id: 'wl-' + Date.now(), name, note });
+                renderWishlist();
+                closeWishlistModal();
+                document.getElementById('wl-name').value = '';
+                document.getElementById('wl-note').value = '';
+                showToast('Přidáno na Wishlist');
+            }
+        }
+
+        function handleSaveBlacklist(e) {
+            e.preventDefault();
+            const name = document.getElementById('bl-name').value.trim();
+            const reason = document.getElementById('bl-reason').value.trim();
+            if (name && reason) {
+                blacklistData.push({ id: 'bl-' + Date.now(), name, reason });
+                renderBlacklist();
+                closeBlacklistModal();
+                document.getElementById('bl-name').value = '';
+                document.getElementById('bl-reason').value = '';
+                showToast('Přidáno na Blacklist');
+            }
+        }
+
+        function removeWishlistItem(id) {
+            wishlistData = wishlistData.filter(i => i.id !== id);
+            renderWishlist();
+        }
+
+        function removeBlacklistItem(id) {
+            blacklistData = blacklistData.filter(i => i.id !== id);
+            renderBlacklist();
+        }
+
+        function moveToCollection(id, name) {
+            removeWishlistItem(id);
+            showToast(`${name} přesunut do plánované sbírky!`);
+        }
+
+        /* ==========================================================================
+           9. INTELLIGENT ADVISOR ALGORITHM ("Espresso Compass")
+           ========================================================================== */
+        function liveAdvisorCalculate() {
+            const q1 = document.getElementById('adv-q1')?.value || 'office';
+            const q2 = document.getElementById('adv-q2')?.value || 'spring';
+            const q3 = document.getElementById('adv-q3')?.value || 'clean';
+
+            const scores = PERFUMES_DATA.map(perfume => {
+                let score = 50; // Base score
+
+                // 1. OCCASION MATCHING
+                if (q1 === 'office') {
+                    if (['reflection-man', 'clive-1872', 'the-hedonist', 'the-musc'].includes(perfume.id)) score += 45;
+                    if (['vanille-havane', 'baraonda', 'liquid-brun'].includes(perfume.id)) score -= 25;
+                } else if (q1 === 'date') {
+                    if (['vanille-havane', 'baraonda', 'sugar-leather', 'liquid-brun', 'yellow-dream'].includes(perfume.id)) score += 50;
+                } else if (q1 === 'gym') {
+                    if (['ingenious-ginger', 'turathi-electric', 'rare-reef'].includes(perfume.id)) score += 60;
+                    if (['vanille-havane', 'baraonda', 'sugar-leather', 'odeon'].includes(perfume.id)) score -= 40;
+                } else if (q1 === 'evening' || q1 === 'formal') {
+                    if (['baraonda', 'odeon', 'clive-1872', 'vanille-havane', 'reflection-man'].includes(perfume.id)) score += 40;
+                }
+
+                // 2. WEATHER MATCHING
+                if (q2 === 'summer') {
+                    if (perfume.seasons.includes('Summer')) score += 30;
+                    if (['vanille-havane', 'baraonda', 'liquid-brun'].includes(perfume.id)) score -= 35;
+                } else if (q2 === 'winter') {
+                    if (perfume.seasons.includes('Winter')) score += 35;
+                    if (['rare-reef', 'turathi-electric'].includes(perfume.id)) score -= 20;
+                }
+
+                // 3. VIBE / IMPRESSION MATCHING
+                if (q3 === 'clean' && perfume.vibes.includes('clean')) score += 35;
+                if (q3 === 'dark' && perfume.vibes.includes('dark')) score += 40;
+                if (q3 === 'sweet' && perfume.vibes.includes('sweet')) score += 35;
+                if (q3 === 'professional' && perfume.vibes.includes('professional')) score += 40;
+                if (q3 === 'dominant' && perfume.vibes.includes('dominant')) score += 35;
+
+                return { perfume, score };
+            });
+
+            // Sort by score descending
+            scores.sort((a, b) => b.score - a.score);
+
+            const primary = scores[0].perfume;
+            const secondary = scores[1].perfume;
+
+            renderAdvisorResults(primary, secondary, q1, q2, q3);
+        }
+
+        function calculateRecommendation(e) {
+            e.preventDefault();
+            liveAdvisorCalculate();
+        }
+
+        function renderAdvisorResults(primary, secondary, q1, q2, q3) {
+            const resultsContainer = document.getElementById('advisor-results');
+            if (!resultsContainer) return;
+
+            let explanationPrimary = "Ideální shoda tónů pro zadanou atmosféru a prostředí.";
+            if (q1 === 'office' || q3 === 'clean' || q3 === 'professional') {
+                if (primary.id === 'reflection-man') explanationPrimary = "Mistrovské dílo čistoty a elegance. Perfektní pro kancelář a profesionální dojem bez rušení okolí.";
+                if (primary.id === 'clive-1872') explanationPrimary = "Ultra-luxusní klasika, která vyzařuje nekompromisní autoritu a noblesu.";
+            } else if (q1 === 'date' || q3 === 'sweet' || q3 === 'dark') {
+                if (primary.id === 'vanille-havane') explanationPrimary = "Temná, podmanivá vanilka s rumem a tabákem. Vytváří neodolatelnou, hřejivou a magnetickou auru.";
+                if (primary.id === 'baraonda') explanationPrimary = "Unikátní whiskey kompozice pro večerní akce, která okamžitě upoutá pozornost.";
+            }
+
+            resultsContainer.innerHTML = `
+                <!-- PRIMARY RECOMMENDATION CARD -->
+                <div class="bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/30 rounded-2xl p-6 border border-amber-500/40 gold-border-glow space-y-4 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-zinc-950 text-[10px] uppercase font-bold tracking-widest px-4 py-1 rounded-bl-xl shadow-md">
+                        100% Doporučená Volba
+                    </div>
+
+                    <div class="flex items-center space-x-2 text-xs font-semibold text-amber-400">
+                        <i data-lucide="crown" class="w-4 h-4"></i>
+                        <span>HLAVNÍ FAVOURITE</span>
+                    </div>
+
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-zinc-400 font-medium">${primary.brand}</span>
+                        <h3 class="text-2xl font-serif font-bold text-zinc-100 mt-0.5 gold-text-gradient">${primary.name}</h3>
+                        <span class="inline-block mt-2 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${primary.type === 'Niche' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'bg-blue-500/10 text-blue-300 border border-blue-500/30'}">${primary.type} Collection</span>
+                    </div>
+
+                    <p class="text-xs text-zinc-300 bg-zinc-950/60 p-3 rounded-xl border border-zinc-800/80 leading-relaxed italic">
+                        "${explanationPrimary}"
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div class="bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800 text-xs">
+                            <span class="text-zinc-500 block text-[10px] uppercase">Hlavní složky</span>
+                            <span class="text-zinc-200 font-medium truncate block">${primary.notes.join(', ')}</span>
+                        </div>
+                        <div class="bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800 text-xs">
+                            <span class="text-zinc-500 block text-[10px] uppercase">Projekce & Výdrž</span>
+                            <span class="text-amber-400 font-bold">${primary.longevity}/10 Longevity</span>
+                        </div>
+                    </div>
+
+                    <button onclick="quickSelectSOTD('${primary.id}')" class="w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold py-3 rounded-xl text-xs transition-all flex items-center justify-center space-x-2">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>Použít ${primary.name} Jako Dnešní SOTD</span>
+                    </button>
+                </div>
+
+                <!-- SECONDARY / ALTERNATIVE RECOMMENDATION CARD -->
+                <div class="bg-zinc-900/80 rounded-2xl p-6 border border-zinc-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2 text-xs font-semibold text-zinc-400">
+                            <i data-lucide="shuffle" class="w-4 h-4 text-zinc-400"></i>
+                            <span>ALTERNATIVNÍ MOŽNOST</span>
+                        </div>
+                        <span class="text-[10px] text-zinc-500">Skvělá druhá volba</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-zinc-500">${secondary.brand}</span>
+                            <h4 class="text-lg font-serif font-bold text-zinc-200">${secondary.name}</h4>
+                        </div>
+                        <button onclick="quickSelectSOTD('${secondary.id}')" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-amber-300 rounded-xl text-xs font-medium border border-zinc-700 transition-all">
+                            Zvolit tuto
+                        </button>
+                    </div>
+                </div>`;
+
+            lucide.createIcons();
+        }
+
+        /* ==========================================================================
+           10. UTILITY TOAST NOTIFICATIONS
+           ========================================================================== */
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 z-50 bg-zinc-900 border border-amber-500/40 text-amber-200 px-5 py-3 rounded-xl shadow-2xl text-xs font-semibold flex items-center space-x-2 transform translate-y-10 opacity-0 transition-all duration-300';
+            toast.innerHTML = `<i data-lucide="info" class="w-4 h-4 text-amber-400"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        /* ==========================================================================
+           11. APP INITIALIZATION ON LOAD
+           ========================================================================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initFirebase();
+            fetchBrnoWeather();
+            renderSOTDSelectOptions();
+        });
+    </script>
+</body>
+</html>
