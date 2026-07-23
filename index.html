@@ -702,23 +702,23 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800">
                     <div class="text-xs text-zinc-400 font-medium">Celkem ve Sbírce</div>
-                    <div class="text-2xl font-serif font-bold text-amber-300 mt-1">17 Parfémů</div>
-                    <div class="text-[10px] text-zinc-500 mt-0.5">11 Niche / 6 Designer</div>
+                    <div class="text-2xl font-serif font-bold text-amber-300 mt-1" id="an-total-count">17 Parfémů</div>
+                    <div class="text-[10px] text-zinc-500 mt-0.5" id="an-total-split">11 Niche / 6 Designer</div>
                 </div>
                 <div class="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800">
                     <div class="text-xs text-zinc-400 font-medium">Průměrná Výdrž</div>
                     <div class="text-2xl font-serif font-bold text-amber-300 mt-1" id="an-avg-longevity">8.3 / 10</div>
-                    <div class="text-[10px] text-zinc-500 mt-0.5">Vysoká trvanlivost</div>
+                    <div class="text-[10px] text-zinc-500 mt-0.5" id="an-avg-longevity-subtext">Vysoká trvanlivost</div>
                 </div>
                 <div class="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800">
                     <div class="text-xs text-zinc-400 font-medium">Nejlépe Hodnocený</div>
-                    <div class="text-base font-serif font-bold text-zinc-200 mt-1 truncate">Vanille Havane</div>
-                    <div class="text-[10px] text-amber-400 mt-0.5">10/10 Longevity</div>
+                    <div class="text-base font-serif font-bold text-zinc-200 mt-1 truncate" id="an-best-perfume">Vanille Havane</div>
+                    <div class="text-[10px] text-amber-400 mt-0.5" id="an-best-perfume-subtext">10/10 Longevity</div>
                 </div>
                 <div class="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800">
                     <div class="text-xs text-zinc-400 font-medium">Celkem Flakónů ml</div>
                     <div class="text-2xl font-serif font-bold text-amber-300 mt-1" id="an-total-ml">1240 ml</div>
-                    <div class="text-[10px] text-zinc-500 mt-0.5">Zbývá ~12,400 střiků</div>
+                    <div class="text-[10px] text-zinc-500 mt-0.5" id="an-total-sprays-subtext">Zbývá ~10,333 střiků</div>
                 </div>
             </div>
 
@@ -888,6 +888,48 @@
                 <div class="flex justify-end space-x-3 pt-2">
                     <button type="button" onclick="closeAddBottleModal()" class="px-4 py-2 text-zinc-400 hover:text-zinc-200">Zrušit</button>
                     <button type="submit" class="px-4 py-2 bg-amber-500 text-zinc-950 font-bold rounded-xl">Přidat do Sbírky</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FOR EDITING/ADJUSTING BOTTLE LEVEL -->
+    <div id="edit-bottle-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-lg font-serif font-bold text-amber-300 flex items-center gap-2">
+                    <i data-lucide="edit-3" class="w-5 h-5 text-amber-400"></i> Upravit Flakón
+                </h3>
+                <button onclick="closeEditBottleModal()" class="text-zinc-500 hover:text-zinc-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form onsubmit="handleSaveEditBottle(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="eb-id">
+                
+                <div>
+                    <label class="block text-zinc-400 mb-1 font-medium">Parfém</label>
+                    <input type="text" id="eb-display-name" disabled class="w-full bg-zinc-950/60 border border-zinc-800/80 rounded-xl px-4 py-2.5 text-zinc-400 font-semibold cursor-not-allowed">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-zinc-400 mb-1 font-medium">Zbývá tekutiny (ml)</label>
+                        <input type="number" step="0.1" min="0" id="eb-remaining" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-amber-500/50">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 mb-1 font-medium">Celkový objem (ml)</label>
+                        <input type="number" step="1" min="1" id="eb-total" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 font-bold focus:outline-none focus:border-amber-500/50">
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between pt-4 border-t border-zinc-800/80">
+                    <button type="button" onclick="handleDeleteBottle()" class="px-4 py-2.5 bg-red-950/30 hover:bg-red-900/40 text-red-400 border border-red-900/30 font-semibold rounded-xl flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> Odstranit flakón
+                    </button>
+                    <div class="flex space-x-2">
+                        <button type="button" onclick="closeEditBottleModal()" class="px-4 py-2.5 text-zinc-400 hover:text-zinc-200">Zrušit</button>
+                        <button type="submit" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl shadow-lg shadow-amber-500/10">Uložit</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -1262,9 +1304,13 @@
         let isFirebaseConnected = false;
 
         function initFirebase() {
-            // Nejprve načteme lokální vlastní parfémy a signature vůni
+            // Nejprve načteme lokální data
             loadCustomPerfumesFromLocalStorage();
+            filterDeletedDefaultPerfumes();
+            loadPerfumeVolumesFromLocalStorage();
             loadSOTDFromLocalStorage();
+            loadWishlistFromLocalStorage();
+            loadBlacklistFromLocalStorage();
             updateSignatureDisplay();
 
             try {
@@ -1282,6 +1328,10 @@
                     console.log("Firebase Firestore initialized successfully.");
                     loadSOTDFromFirestore();
                     loadCustomPerfumesFromFirestore();
+                    loadPerfumeVolumesFromFirestore();
+                    loadDeletedDefaultsFromFirestore();
+                    loadWishlistFromFirestore();
+                    loadBlacklistFromFirestore();
                     loadSignatureScentFromFirestore();
                 }
             } catch (err) {
@@ -1439,6 +1489,8 @@
                 perfume.remainingMl = Math.max(0, parseFloat((perfume.remainingMl - mlDeducted).toFixed(2)));
             }
 
+            savePerfumeVolumes();
+
             const entry = {
                 id: 'sotd-' + Date.now(),
                 timestamp: new Date().toISOString(),
@@ -1468,6 +1520,8 @@
             saveSOTDData();
             renderSOTDHistory();
             renderSOTDSelectOptions();
+            renderInventoryGrid();
+            renderAnalyticsCharts();
             
             document.getElementById('sotd-notes').value = '';
             document.getElementById('sotd-layer-toggle').checked = false;
@@ -1642,6 +1696,7 @@
             sotdHistory = sotdHistory.filter(i => i.id !== id);
             saveSOTDData();
             renderSOTDHistory();
+            renderAnalyticsCharts();
             showToast('Záznam byl smazán.');
         }
 
@@ -1650,6 +1705,7 @@
                 sotdHistory = [];
                 saveSOTDData();
                 renderSOTDHistory();
+                renderAnalyticsCharts();
                 showToast('Historie byla vymazána.');
             }
         }
@@ -1696,6 +1752,8 @@
                 const crownHtml = isSig 
                     ? `<button onclick="setSignatureScent('${p.id}')" title="Moje Signature Vůně" class="p-1 text-amber-400 hover:text-amber-300 transition-colors"><i data-lucide="crown" class="w-4 h-4 fill-amber-400"></i></button>`
                     : `<button onclick="setSignatureScent('${p.id}')" title="Nastavit jako Signature" class="p-1 text-zinc-600 hover:text-amber-400 transition-colors opacity-40 group-hover:opacity-100"><i data-lucide="crown" class="w-4 h-4"></i></button>`;
+                
+                const editBtnHtml = `<button onclick="openEditBottleModal('${p.id}')" title="Upravit nebo smazat flakón" class="p-1 text-zinc-600 hover:text-amber-400 transition-colors opacity-40 group-hover:opacity-100"><i data-lucide="sliders" class="w-4 h-4"></i></button>`;
 
                 html += `
                     <div class="bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800/80 hover:border-amber-500/30 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-lg">
@@ -1703,6 +1761,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${p.type === 'Niche' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'bg-blue-500/10 text-blue-300 border border-blue-500/30'}">${p.type}</span>
                                 <div class="flex items-center space-x-2 text-xs text-amber-400">
+                                    ${editBtnHtml}
                                     ${crownHtml}
                                     <div class="flex items-center space-x-1">
                                         <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
@@ -1829,7 +1888,10 @@
             const name = document.getElementById('wl-name').value.trim();
             const note = document.getElementById('wl-note').value.trim();
             if (name) {
-                wishlistData.push({ id: 'wl-' + Date.now(), name, note });
+                const newItem = { id: 'wl-' + Date.now(), name, note };
+                wishlistData.push(newItem);
+                localStorage.setItem('olfaktor_wishlist', JSON.stringify(wishlistData));
+                saveWishlistItemToFirestore(newItem);
                 renderWishlist();
                 closeWishlistModal();
                 document.getElementById('wl-name').value = '';
@@ -1843,7 +1905,10 @@
             const name = document.getElementById('bl-name').value.trim();
             const reason = document.getElementById('bl-reason').value.trim();
             if (name && reason) {
-                blacklistData.push({ id: 'bl-' + Date.now(), name, reason });
+                const newItem = { id: 'bl-' + Date.now(), name, reason };
+                blacklistData.push(newItem);
+                localStorage.setItem('olfaktor_blacklist', JSON.stringify(blacklistData));
+                saveBlacklistItemToFirestore(newItem);
                 renderBlacklist();
                 closeBlacklistModal();
                 document.getElementById('bl-name').value = '';
@@ -1854,17 +1919,26 @@
 
         function removeWishlistItem(id) {
             wishlistData = wishlistData.filter(i => i.id !== id);
+            localStorage.setItem('olfaktor_wishlist', JSON.stringify(wishlistData));
+            deleteWishlistItemFromFirestore(id);
             renderWishlist();
         }
 
         function removeBlacklistItem(id) {
             blacklistData = blacklistData.filter(i => i.id !== id);
+            localStorage.setItem('olfaktor_blacklist', JSON.stringify(blacklistData));
+            deleteBlacklistItemFromFirestore(id);
             renderBlacklist();
         }
 
         function moveToCollection(id, name) {
             removeWishlistItem(id);
-            showToast(`${name} přesunut do plánované sbírky!`);
+            openAddBottleModal();
+            const nameInput = document.getElementById('cp-name');
+            if (nameInput) {
+                nameInput.value = name;
+            }
+            showToast(`Doplňte značku a detaily pro ${name}.`);
         }
 
         /* ==========================================================================
@@ -1938,15 +2012,15 @@
                     let noteMatched = false;
                     const notesLower = perfume.notes.map(n => n.toLowerCase());
                     if (q5 === 'citrus') {
-                        noteMatched = notesLower.some(n => ['citrus', 'bergamot', 'grapefruit', 'mandarin', 'petitgrain', 'neroli', 'ginger', 'zázvor'].includes(n));
+                        noteMatched = notesLower.some(n => ['citrus', 'bergamot', 'grapefruit', 'mandarin', 'mandarinka', 'petitgrain', 'neroli', 'ginger', 'zázvor', 'lemon', 'limon', 'orange', 'pomeranč', 'citrusy', 'citrón', 'pink pepper', 'lemonade'].some(k => n.includes(k)));
                     } else if (q5 === 'wood') {
-                        noteMatched = notesLower.some(n => ['wood', 'oud', 'cedarwood', 'sandalwood', 'guaiac wood', 'birch', 'driftwood', 'akigalawood', 'cedr', 'dřevo'].includes(n));
+                        noteMatched = notesLower.some(n => ['wood', 'oud', 'cedarwood', 'sandalwood', 'guaiac wood', 'birch', 'driftwood', 'akigalawood', 'cedr', 'dřevo', 'vetiver', 'patchouli', 'pačuli', 'moss', 'oakmoss', 'mech', 'woody notes'].some(k => n.includes(k)));
                     } else if (q5 === 'sweet') {
-                        noteMatched = notesLower.some(n => ['vanilla', 'vanilka', 'caramel', 'karamel', 'praline', 'pralinky', 'dates', 'datle', 'sugar', 'cacao', 'kakao'].includes(n));
+                        noteMatched = notesLower.some(n => ['vanilla', 'vanilka', 'caramel', 'karamel', 'praline', 'pralinky', 'dates', 'datle', 'sugar', 'cacao', 'kakao', 'honey', 'honeyed', 'med', 'tonka', 'chocolate', 'čokoláda', 'sweet notes', 'caramelized'].some(k => n.includes(k)));
                     } else if (q5 === 'spicy') {
-                        noteMatched = notesLower.some(n => ['cardamom', 'kardamom', 'clove', 'hřebíček', 'cinnamon', 'skořice', 'tobacco', 'tabák', 'rum', 'ginger', 'zázvor'].includes(n));
+                        noteMatched = notesLower.some(n => ['cardamom', 'kardamom', 'clove', 'hřebíček', 'cloves', 'cinnamon', 'skořice', 'tobacco', 'tabák', 'rum', 'ginger', 'zázvor', 'pepper', 'pepř', 'pink pepper', 'spicy notes'].some(k => n.includes(k)));
                     } else if (q5 === 'leather') {
-                        noteMatched = notesLower.some(n => ['leather', 'kůže', 'suede', 'semiš', 'labdanum'].includes(n));
+                        noteMatched = notesLower.some(n => ['leather', 'kůže', 'suede', 'semiš', 'labdanum'].some(k => n.includes(k)));
                     }
 
                     if (noteMatched) score += 55; // Silná váha pro složku!
@@ -2321,6 +2395,64 @@
         function renderAnalyticsCharts() {
             if (typeof Chart === 'undefined') return;
 
+            // 0. Aktualizace sumárních karet dynamicky
+            const totalCount = PERFUMES_DATA.length;
+            const nicheCount = PERFUMES_DATA.filter(p => p.type === 'Niche').length;
+            const designerCount = PERFUMES_DATA.filter(p => p.type === 'Designer').length;
+            
+            const totalCountEl = document.getElementById('an-total-count');
+            const totalSplitEl = document.getElementById('an-total-split');
+            if (totalCountEl) totalCountEl.innerText = `${totalCount} ${totalCount === 1 ? 'Parfém' : (totalCount >= 2 && totalCount <= 4) ? 'Parfémy' : 'Parfémů'}`;
+            if (totalSplitEl) totalSplitEl.innerText = `${nicheCount} Niche / ${designerCount} Designer`;
+
+            // Průměrná výdrž (Longevity)
+            let avgLongevity = 0;
+            if (totalCount > 0) {
+                const sum = PERFUMES_DATA.reduce((acc, p) => acc + p.longevity, 0);
+                avgLongevity = parseFloat((sum / totalCount).toFixed(1));
+            }
+            const avgLongEl = document.getElementById('an-avg-longevity');
+            const avgLongSubEl = document.getElementById('an-avg-longevity-subtext');
+            if (avgLongEl) avgLongEl.innerText = `${avgLongevity} / 10`;
+            if (avgLongSubEl) {
+                avgLongSubEl.innerText = avgLongevity >= 8.5 ? 'Extrémní trvanlivost' : avgLongevity >= 7.5 ? 'Vysoká trvanlivost' : 'Průměrná trvanlivost';
+            }
+
+            // Nejlépe hodnocený parfém (nejvyšší longevity, pak sillage)
+            let bestPerfume = null;
+            if (totalCount > 0) {
+                bestPerfume = [...PERFUMES_DATA].sort((a, b) => {
+                    if (b.longevity !== a.longevity) return b.longevity - a.longevity;
+                    return b.sillage - a.sillage;
+                })[0];
+            }
+            const bestPerfumeEl = document.getElementById('an-best-perfume');
+            const bestPerfumeSubEl = document.getElementById('an-best-perfume-subtext');
+            if (bestPerfumeEl && bestPerfume) {
+                bestPerfumeEl.innerText = bestPerfume.name;
+                bestPerfumeEl.title = `${bestPerfume.brand} - ${bestPerfume.name}`;
+            }
+            if (bestPerfumeSubEl && bestPerfume) {
+                bestPerfumeSubEl.innerText = `${bestPerfume.longevity}/10 Výdrž & ${bestPerfume.sillage}/10 Projekce`;
+            }
+
+            // Celkem flakónů ml
+            let totalRemainingMl = 0;
+            PERFUMES_DATA.forEach(p => {
+                totalRemainingMl += p.remainingMl;
+            });
+            totalRemainingMl = parseFloat(totalRemainingMl.toFixed(1));
+            
+            // Celkem střiků left (s rozprašováním 0.12ml/střik)
+            const totalSpraysLeft = Math.round(totalRemainingMl / 0.12);
+
+            const totalMlEl = document.getElementById('an-total-ml');
+            const totalSpraysSubEl = document.getElementById('an-total-sprays-subtext');
+            if (totalMlEl) totalMlEl.innerText = `${totalRemainingMl} ml`;
+            if (totalSpraysSubEl) {
+                totalSpraysSubEl.innerText = `Zbývá ~${totalSpraysLeft.toLocaleString('cs-CZ')} střiků`;
+            }
+
             // Zničíme předchozí instance, aby se grafy překreslovaly s aktuálními daty (např. po přidání flakónu či zápisu SOTD)
             const chartIds = ['chart-performance', 'chart-category', 'chart-notes', 'chart-seasons', 'chart-wear-tracker'];
             chartIds.forEach(id => {
@@ -2587,6 +2719,7 @@
             renderSOTDSelectOptions();
             renderInventoryGrid();
             populateMatchmakerSelect();
+            renderAnalyticsCharts();
             closeAddBottleModal();
 
             // Vyčištění formuláře
@@ -2644,6 +2777,302 @@
                     populateMatchmakerSelect();
                     updateSignatureDisplay();
                 }).catch(e => console.warn("Chyba načítání vlastních parfémů:", e));
+            }
+        }
+
+        // --- WISHLIST & BLACKLIST PERSISTENCE ACTIONS ---
+        function loadWishlistFromLocalStorage() {
+            const saved = localStorage.getItem('olfaktor_wishlist');
+            if (saved) {
+                try { wishlistData = JSON.parse(saved); } catch(e){}
+            }
+        }
+
+        function loadBlacklistFromLocalStorage() {
+            const saved = localStorage.getItem('olfaktor_blacklist');
+            if (saved) {
+                try { blacklistData = JSON.parse(saved); } catch(e){}
+            }
+        }
+
+        function loadWishlistFromFirestore() {
+            if (isFirebaseConnected && db) {
+                db.collection('wishlist').get().then(snapshot => {
+                    let remoteWl = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data && data.id) remoteWl.push(data);
+                    });
+                    if (remoteWl.length > 0) {
+                        wishlistData = remoteWl;
+                        localStorage.setItem('olfaktor_wishlist', JSON.stringify(wishlistData));
+                        renderWishlist();
+                    }
+                }).catch(e => console.warn("Chyba načítání wishlistu z Firestore:", e));
+            }
+        }
+
+        function loadBlacklistFromFirestore() {
+            if (isFirebaseConnected && db) {
+                db.collection('blacklist').get().then(snapshot => {
+                    let remoteBl = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data && data.id) remoteBl.push(data);
+                    });
+                    if (remoteBl.length > 0) {
+                        blacklistData = remoteBl;
+                        localStorage.setItem('olfaktor_blacklist', JSON.stringify(blacklistData));
+                        renderBlacklist();
+                    }
+                }).catch(e => console.warn("Chyba načítání blacklistu z Firestore:", e));
+            }
+        }
+
+        function saveWishlistItemToFirestore(item) {
+            if (isFirebaseConnected && db) {
+                try { db.collection('wishlist').doc(item.id).set(item); } catch(e){}
+            }
+        }
+
+        function deleteWishlistItemFromFirestore(id) {
+            if (isFirebaseConnected && db) {
+                try { db.collection('wishlist').doc(id).delete(); } catch(e){}
+            }
+        }
+
+        // Blacklist
+        function saveBlacklistItemToFirestore(item) {
+            if (isFirebaseConnected && db) {
+                try { db.collection('blacklist').doc(item.id).set(item); } catch(e){}
+            }
+        }
+
+        function deleteBlacklistItemFromFirestore(id) {
+            if (isFirebaseConnected && db) {
+                try { db.collection('blacklist').doc(id).delete(); } catch(e){}
+            }
+        }
+        // --- PERFUME VOLUME PERSISTENCE ACTIONS ---
+        function savePerfumeVolumes() {
+            const volumes = {};
+            PERFUMES_DATA.forEach(p => {
+                volumes[p.id] = p.remainingMl;
+            });
+            localStorage.setItem('olfaktor_perfume_volumes', JSON.stringify(volumes));
+            
+            if (isFirebaseConnected && db) {
+                PERFUMES_DATA.forEach(p => {
+                    try {
+                        db.collection('perfume_volumes').doc(p.id).set({ remainingMl: p.remainingMl });
+                    } catch(e){}
+                });
+            }
+        }
+
+        function loadPerfumeVolumesFromLocalStorage() {
+            const saved = localStorage.getItem('olfaktor_perfume_volumes');
+            if (saved) {
+                try {
+                    const volumes = JSON.parse(saved);
+                    PERFUMES_DATA.forEach(p => {
+                        if (volumes[p.id] !== undefined) {
+                            p.remainingMl = volumes[p.id];
+                        }
+                    });
+                } catch(e){}
+            }
+        }
+
+        function loadPerfumeVolumesFromFirestore() {
+            if (isFirebaseConnected && db) {
+                db.collection('perfume_volumes').get().then(snapshot => {
+                    const volumes = {};
+                    snapshot.forEach(doc => {
+                        volumes[doc.id] = doc.data().remainingMl;
+                    });
+                    
+                    PERFUMES_DATA.forEach(p => {
+                        if (volumes[p.id] !== undefined) {
+                            p.remainingMl = volumes[p.id];
+                        }
+                    });
+                    
+                    const localVol = {};
+                    PERFUMES_DATA.forEach(p => {
+                        localVol[p.id] = p.remainingMl;
+                    });
+                    localStorage.setItem('olfaktor_perfume_volumes', JSON.stringify(localVol));
+                    
+                    renderInventoryGrid();
+                    renderSOTDSelectOptions();
+                    renderAnalyticsCharts();
+                }).catch(e => {});
+            }
+        }
+
+        // --- EDIT, ADJUST & DELETE BOTTLE ACTIONS ---
+        function openEditBottleModal(id) {
+            const perfume = PERFUMES_DATA.find(p => p.id === id);
+            if (!perfume) return;
+            
+            document.getElementById('eb-id').value = perfume.id;
+            document.getElementById('eb-display-name').value = `${perfume.brand} - ${perfume.name}`;
+            document.getElementById('eb-remaining').value = perfume.remainingMl;
+            document.getElementById('eb-total').value = perfume.totalMl;
+            
+            document.getElementById('edit-bottle-modal').classList.remove('hidden');
+        }
+
+        function closeEditBottleModal() {
+            document.getElementById('edit-bottle-modal').classList.add('hidden');
+        }
+
+        function handleSaveEditBottle(e) {
+            e.preventDefault();
+            const id = document.getElementById('eb-id').value;
+            const remaining = parseFloat(document.getElementById('eb-remaining').value);
+            const total = parseFloat(document.getElementById('eb-total').value);
+            
+            if (isNaN(remaining) || isNaN(total) || remaining < 0 || total < 1) {
+                showToast('Chyba: Zadejte platná čísla.');
+                return;
+            }
+            if (remaining > total) {
+                showToast('Chyba: Zbývající množství nemůže překročit celkový objem.');
+                return;
+            }
+            
+            const perfume = PERFUMES_DATA.find(p => p.id === id);
+            if (!perfume) return;
+            
+            perfume.remainingMl = parseFloat(remaining.toFixed(2));
+            perfume.totalMl = total;
+            
+            // Pokud je to custom parfém, musíme ho aktualizovat v local storage
+            if (id.startsWith('custom-')) {
+                let customs = [];
+                const saved = localStorage.getItem('olfaktor_custom_perfumes');
+                if (saved) {
+                    try {
+                        customs = JSON.parse(saved);
+                        const idx = customs.findIndex(c => c.id === id);
+                        if (idx !== -1) {
+                            customs[idx].remainingMl = perfume.remainingMl;
+                            customs[idx].totalMl = perfume.totalMl;
+                            localStorage.setItem('olfaktor_custom_perfumes', JSON.stringify(customs));
+                        }
+                    } catch(err){}
+                }
+                
+                // Firestore sync pro custom parfém
+                if (isFirebaseConnected && db) {
+                    try {
+                        db.collection('custom_perfumes').doc(id).set(perfume, { merge: true });
+                    } catch(err){}
+                }
+            }
+            
+            // Uložit objemy pro všechny parfémy
+            savePerfumeVolumes();
+            
+            renderInventoryGrid();
+            renderSOTDSelectOptions();
+            renderAnalyticsCharts();
+            
+            closeEditBottleModal();
+            showToast(`Množství u vůně ${perfume.name} aktualizováno!`);
+        }
+
+        function handleDeleteBottle() {
+            const id = document.getElementById('eb-id').value;
+            const perfume = PERFUMES_DATA.find(p => p.id === id);
+            if (!perfume) return;
+            
+            if (confirm(`Opravdu chcete odebrat parfém ${perfume.brand} - ${perfume.name} ze své sbírky?`)) {
+                // Smazat z paměti
+                PERFUMES_DATA = PERFUMES_DATA.filter(p => p.id !== id);
+                
+                // Pokud je to custom parfém, smazat z local storage
+                if (id.startsWith('custom-')) {
+                    let customs = [];
+                    const saved = localStorage.getItem('olfaktor_custom_perfumes');
+                    if (saved) {
+                        try {
+                            customs = JSON.parse(saved).filter(c => c.id !== id);
+                            localStorage.setItem('olfaktor_custom_perfumes', JSON.stringify(customs));
+                        } catch(err){}
+                    }
+                    
+                    // Smazat z Firestore
+                    if (isFirebaseConnected && db) {
+                        try {
+                            db.collection('custom_perfumes').doc(id).delete();
+                        } catch(err){}
+                    }
+                } else {
+                    // Pokud smažeme výchozí parfém, musíme zajistit, aby se nenačetl jeho výchozí stav
+                    let deletedDefaults = [];
+                    const savedDeleted = localStorage.getItem('olfaktor_deleted_defaults');
+                    if (savedDeleted) {
+                        try { deletedDefaults = JSON.parse(savedDeleted); } catch(err){}
+                    }
+                    deletedDefaults.push(id);
+                    localStorage.setItem('olfaktor_deleted_defaults', JSON.stringify(deletedDefaults));
+                    
+                    if (isFirebaseConnected && db) {
+                        try {
+                            db.collection('settings').doc('deleted_defaults').set({ list: deletedDefaults });
+                        } catch(e){}
+                    }
+                }
+                
+                // Pokud byla smazána signature vůně, musíme ji resetovat
+                if (id === signatureScentId) {
+                    signatureScentId = 'reflection-man';
+                    localStorage.setItem('olfaktor_signature_scents', signatureScentId);
+                    updateSignatureDisplay();
+                }
+
+                // Aktualizovat perzistentní objemy
+                savePerfumeVolumes();
+                
+                renderInventoryGrid();
+                renderSOTDSelectOptions();
+                renderAnalyticsCharts();
+                populateMatchmakerSelect();
+                
+                closeEditBottleModal();
+                showToast(`Parfém ${perfume.name} byl odebrán ze sbírky.`);
+            }
+        }
+
+        // --- DELETED DEFAULT PERFUMES SYNC ---
+        function filterDeletedDefaultPerfumes() {
+            const savedDeleted = localStorage.getItem('olfaktor_deleted_defaults');
+            if (savedDeleted) {
+                try {
+                    const deletedDefaults = JSON.parse(savedDeleted);
+                    PERFUMES_DATA = PERFUMES_DATA.filter(p => !deletedDefaults.includes(p.id));
+                } catch(e){}
+            }
+        }
+
+        function loadDeletedDefaultsFromFirestore() {
+            if (isFirebaseConnected && db) {
+                db.collection('settings').doc('deleted_defaults').get().then(doc => {
+                    if (doc.exists && doc.data().list) {
+                        const remoteDeleted = doc.data().list;
+                        localStorage.setItem('olfaktor_deleted_defaults', JSON.stringify(remoteDeleted));
+                        
+                        PERFUMES_DATA = PERFUMES_DATA.filter(p => !remoteDeleted.includes(p.id));
+                        
+                        renderInventoryGrid();
+                        renderSOTDSelectOptions();
+                        renderAnalyticsCharts();
+                        populateMatchmakerSelect();
+                    }
+                }).catch(e => {});
             }
         }
 
