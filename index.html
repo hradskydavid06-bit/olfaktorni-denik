@@ -391,6 +391,10 @@
                         <button type="button" id="wizard-btn-prev" onclick="wizardPrevStep()" class="px-4 py-2 text-xs text-zinc-400 hover:text-zinc-200 bg-zinc-950 border border-zinc-800 rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                             Zpět
                         </button>
+                        <button type="button" onclick="resetWizard()" class="px-4 py-2 text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1 font-medium">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            <span>Reset</span>
+                        </button>
                         <button type="button" id="wizard-btn-next" onclick="wizardNextStep()" class="px-4 py-2 text-xs bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl transition-all flex items-center gap-1">
                             <span>Pokračovat</span>
                             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
@@ -1575,6 +1579,20 @@
                 }
                 showToast('Doporučení bylo vygenerováno!');
             }
+        }
+
+        function resetWizard() {
+            currentWizardStep = 1;
+            wizardAnswers = {
+                q1: 'office',
+                q2: 'spring',
+                q3: 'clean',
+                q4: 'shirt',
+                q5: 'any'
+            };
+            renderWizard();
+            liveAdvisorCalculate();
+            showToast('Dotazník byl resetován do výchozího stavu.');
         }
 
         function liveAdvisorCalculate() {
