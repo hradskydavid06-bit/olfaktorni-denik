@@ -275,7 +275,7 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <!-- ==================== TAB 1: OLFAKTORNÍ RÁDCE (HLAVNÍ) ==================== -->
-        <section id="tab-content-advisor" class="tab-page space-y-8">
+        <section id="tab-content-inventory" class="tab-page hidden space-y-8">
             
             <!-- Filter Bar & Search -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/80 p-6 rounded-2xl border border-zinc-800/80">
@@ -358,7 +358,7 @@
         </section>
 
         <!-- ==================== TAB 3: INTELIGENTNÍ RÁDCE & LAYERING ==================== -->
-        <section id="tab-content-advisor" class="tab-page hidden space-y-8">
+        <section id="tab-content-advisor" class="tab-page space-y-8">
             
             <div class="bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-950 p-6 rounded-2xl border border-zinc-800/80 shadow-xl">
                 <h2 class="text-2xl font-serif font-bold text-zinc-100 flex items-center gap-2">
@@ -2745,6 +2745,7 @@
             fetchBrnoWeather();
             renderWizard();
             liveAdvisorCalculate();
+            renderInventoryGrid();
             populateMatchmakerSelect();
         }
 
