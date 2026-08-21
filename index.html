@@ -59,132 +59,153 @@
 
         /* Custom Gold Glows & Card Styles */
         .gold-border-glow {
-            box-shadow: none !important;
+            box-shadow: 0 0 30px -10px rgba(245, 158, 11, 0.15) !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
         }
         .gold-text-gradient {
-            background: none !important;
-            -webkit-background-clip: initial !important;
-            -webkit-text-fill-color: initial !important;
-            color: #f4f4f5 !important;
+            background: linear-gradient(135deg, #fef08a 0%, #fbbf24 50%, #d97706 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            color: transparent !important;
+            display: inline-block;
         }
         .glass-panel {
-            background: rgba(12, 12, 14, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
-        /* Luxury Monochromatic Minimalist Overrides */
+        /* Luxury Dark Mode Aesthetic */
         body {
-            background-color: #09090b !important;
-            color: #d4d4d8 !important;
+            background-color: #060608 !important;
+            color: #e4e4e7 !important;
         }
         header {
-            background-color: rgba(9, 9, 11, 0.9) !important;
-            border-bottom: 1px solid #1f1f23 !important;
+            background-color: rgba(6, 6, 8, 0.85) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
         }
         nav.hidden.md\:flex {
-            background-color: #121214 !important;
-            border: 1px solid #1f1f23 !important;
-            border-radius: 12px !important;
+            background-color: rgba(24, 24, 27, 0.5) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 9999px !important;
+            padding: 4px !important;
         }
         .nav-tab {
-            color: #71717a !important;
+            color: #a1a1aa !important;
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
-            transition: all 0.2s ease !important;
+            transition: all 0.3s ease !important;
+            border-radius: 9999px !important;
         }
         .nav-tab:hover {
             color: #f4f4f5 !important;
+            background-color: rgba(255, 255, 255, 0.02) !important;
         }
         .nav-tab.text-amber-300 {
-            color: #ffffff !important;
-            background-color: #1c1c1f !important;
-            border-radius: 8px !important;
-            border: 1px solid #27272a !important;
+            color: #09090b !important;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15) !important;
         }
-        /* Card Panel Overrides */
+        
+        /* Modern Glass Cards */
         .bg-zinc-900\/80, .bg-zinc-900, .bg-zinc-950\/80, .bg-gradient-to-r.from-zinc-900 {
-            background-color: #121214 !important;
-            background-image: none !important;
-            border: 1px solid #1f1f23 !important;
-            box-shadow: none !important;
+            background: rgba(18, 18, 22, 0.6) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.04) !important;
+            border-radius: 20px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .bg-zinc-900\/80:hover {
+            border-color: rgba(245, 158, 11, 0.15) !important;
+            box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.05) !important;
         }
         .border-zinc-800\/80, .border-zinc-800, .border-zinc-700\/60, .border-zinc-700\/50, .border-zinc-900 {
-            border-color: #1f1f23 !important;
+            border-color: rgba(255, 255, 255, 0.05) !important;
         }
-        /* Buttons overrides */
+        
+        /* Gold Accent Buttons */
         button.bg-amber-500, button.bg-gradient-to-r.from-amber-500 {
-            background-image: none !important;
-            background-color: #f4f4f5 !important;
-            color: #09090b !important;
-            font-weight: 600 !important;
-            border: 1px solid #f4f4f5 !important;
-            transition: all 0.2s ease !important;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+            color: #060608 !important;
+            font-weight: 700 !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border-radius: 12px !important;
         }
         button.bg-amber-500:hover, button.bg-gradient-to-r.from-amber-500:hover {
-            background-color: #ffffff !important;
-            color: #09090b !important;
-            box-shadow: 0 0 12px rgba(255, 255, 255, 0.15) !important;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4) !important;
+            transform: translateY(-1px) scale(1.02) !important;
         }
-        button.bg-amber-500\/10, button.bg-amber-500\/10\/hover {
-            background-color: rgba(255, 255, 255, 0.04) !important;
-            border-color: #27272a !important;
-            color: #f4f4f5 !important;
+        button.bg-amber-500\/10 {
+            background-color: rgba(245, 158, 11, 0.08) !important;
+            border: 1px solid rgba(245, 158, 11, 0.2) !important;
+            color: #fef08a !important;
+            transition: all 0.2s ease !important;
+        }
+        button.bg-amber-500\/10:hover {
+            background-color: rgba(245, 158, 11, 0.15) !important;
+            border-color: rgba(245, 158, 11, 0.3) !important;
         }
         button.bg-zinc-800 {
-            background-color: #18181b !important;
-            border-color: #27272a !important;
-            color: #d4d4d8 !important;
+            background-color: rgba(39, 39, 42, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            color: #e4e4e7 !important;
+            transition: all 0.2s ease !important;
         }
         button.bg-zinc-800:hover {
-            background-color: #27272a !important;
-            color: #ffffff !important;
+            background-color: rgba(39, 39, 42, 0.9) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
         }
-        /* Inputs */
+        
+        /* Modern Inputs */
         input, select, textarea {
-            background-color: #09090b !important;
-            border-color: #1f1f23 !important;
+            background-color: rgba(9, 9, 11, 0.7) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
             color: #f4f4f5 !important;
+            border-radius: 12px !important;
+            transition: all 0.2s ease !important;
         }
         input:focus, select:focus, textarea:focus {
-            border-color: #3f3f46 !important;
+            border-color: rgba(245, 158, 11, 0.4) !important;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.08) !important;
+            outline: none !important;
         }
+        
         /* Text Accents & Badges */
         .text-amber-400, .text-amber-300, .text-amber-200, .text-amber-300\/80, .text-amber-400\/90 {
-            color: #e4e4e7 !important;
+            color: #fbbf24 !important;
         }
         .bg-amber-500\/10 {
-            background-color: rgba(255, 255, 255, 0.03) !important;
-            border-color: #1f1f23 !important;
-            color: #e4e4e7 !important;
+            background-color: rgba(245, 158, 11, 0.08) !important;
+            border: 1px solid rgba(245, 158, 11, 0.15) !important;
+            color: #fef08a !important;
         }
         .fill-amber-400 {
-            fill: #d4d4d8 !important;
+            fill: #f59e0b !important;
         }
-        /* Header signature */
         #header-signature {
-            background-color: rgba(255, 255, 255, 0.03) !important;
-            border-color: #1f1f23 !important;
-            color: #d4d4d8 !important;
+            background-color: rgba(245, 158, 11, 0.06) !important;
+            border: 1px solid rgba(245, 158, 11, 0.15) !important;
+            color: #fef08a !important;
         }
         #header-signature i {
-            color: #d4d4d8 !important;
+            color: #f59e0b !important;
         }
-        /* Liquid progress bar */
-        .bg-gradient-to-r.from-amber-600.to-amber-400 {
-            background-image: linear-gradient(to right, #3f3f46, #e4e4e7) !important;
-        }
-        /* Mobile Nav */
-        .md\:hidden.border-t.border-zinc-800\/60 {
-            background-color: #09090b !important;
-            border-top: 1px solid #1f1f23 !important;
-        }
+        
+        /* Mobile Sticky Navigation Styling */
         .mobile-nav-tab {
-            color: #52525b !important;
+            color: #71717a !important;
+            border-radius: 12px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
         .mobile-nav-tab.text-amber-300 {
-            color: #ffffff !important;
+            color: #fbbf24 !important;
+            background-color: rgba(245, 158, 11, 0.08) !important;
+            box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.05) !important;
         }
         /* Custom animations for Wizard and Card Highlights */
         @keyframes fadeIn {
@@ -254,25 +275,25 @@
             </div>
         </div>
 
-        <!-- Mobile Navigation Tabs -->
-        <div class="md:hidden border-t border-zinc-800/60 bg-zinc-900/90 px-2 py-2 flex justify-around">
-            <button onclick="switchTab('advisor')" id="mobile-tab-advisor" class="mobile-nav-tab flex flex-col items-center py-1 px-2 rounded-lg text-[11px] font-medium text-amber-300">
-                <i data-lucide="compass" class="w-4 h-4 mb-0.5"></i>
+        <!-- Mobile Navigation Tabs (Fixed at the bottom of the viewport) -->
+        <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800/60 bg-zinc-950/90 backdrop-blur-md px-2 pt-2.5 pb-4 flex justify-around shadow-2xl">
+            <button onclick="switchTab('advisor')" id="mobile-tab-advisor" class="mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-xl text-[11px] font-semibold text-amber-300 transition-all">
+                <i data-lucide="compass" class="w-5 h-5 mb-0.5"></i>
                 <span>Rádce</span>
             </button>
-            <button onclick="switchTab('inventory')" id="mobile-tab-inventory" class="mobile-nav-tab flex flex-col items-center py-1 px-2 rounded-lg text-[11px] font-medium text-zinc-400">
-                <i data-lucide="layers" class="w-4 h-4 mb-0.5"></i>
+            <button onclick="switchTab('inventory')" id="mobile-tab-inventory" class="mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-xl text-[11px] font-semibold text-zinc-400 transition-all">
+                <i data-lucide="layers" class="w-5 h-5 mb-0.5"></i>
                 <span>Sbírka</span>
             </button>
-            <button onclick="switchTab('analytics')" id="mobile-tab-analytics" class="mobile-nav-tab flex flex-col items-center py-1 px-2 rounded-lg text-[11px] font-medium text-zinc-400">
-                <i data-lucide="bar-chart-3" class="w-4 h-4 mb-0.5"></i>
+            <button onclick="switchTab('analytics')" id="mobile-tab-analytics" class="mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-xl text-[11px] font-semibold text-zinc-400 transition-all">
+                <i data-lucide="bar-chart-3" class="w-5 h-5 mb-0.5"></i>
                 <span>Grafy</span>
             </button>
         </div>
     </header>
 
     <!-- MAIN CONTENT CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
 
         <!-- ==================== TAB 1: OLFAKTORNÍ RÁDCE (HLAVNÍ) ==================== -->
         <section id="tab-content-inventory" class="tab-page hidden space-y-8">
@@ -948,21 +969,7 @@
                 desc: 'Energický citrusovo-akvatický náboj pro aktivní dny.',
                 favOccasion: 'Posilovna & Léto'
             },
-            {
-                id: 'yellow-dream',
-                brand: 'Valentino',
-                name: 'Born in Roma Yellow Dream',
-                type: 'Designer',
-                notes: ['Pineapple', 'Gingerbread', 'Vanilla'],
-                seasons: ['Spring', 'Summer', 'Autumn'],
-                vibes: ['sweet', 'leisure', 'date'],
-                longevity: 8,
-                sillage: 7,
-                totalMl: 100,
-                remainingMl: 81.0,
-                desc: 'Hravý ananas s perníkovým kořením a svěžím nádechem.',
-                favOccasion: 'Rande & Letní večery'
-            },
+
 
             {
                 id: 'supremacy-collectors',
@@ -1196,7 +1203,7 @@
                 btn.className = "nav-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50";
             });
             document.querySelectorAll('.mobile-nav-tab').forEach(btn => {
-                btn.className = "mobile-nav-tab flex flex-col items-center py-1 px-2 rounded-lg text-[11px] font-medium text-zinc-400";
+                btn.className = "mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-xl text-[11px] font-semibold text-zinc-400";
             });
 
             const activePage = document.getElementById(`tab-content-${tabName}`);
@@ -1208,7 +1215,7 @@
             }
             const mobileBtn = document.getElementById(`mobile-tab-${tabName}`);
             if (mobileBtn) {
-                mobileBtn.className = "mobile-nav-tab flex flex-col items-center py-1 px-2 rounded-lg text-[11px] font-medium text-amber-300";
+                mobileBtn.className = "mobile-nav-tab flex flex-col items-center py-1 px-3 rounded-xl text-[11px] font-semibold text-amber-300";
             }
 
             if (tabName === 'inventory') {
@@ -1515,7 +1522,7 @@
             let html = `
                 <div class="space-y-4 animate-fade-in">
                     <label class="block text-xs uppercase tracking-wider text-amber-300/90 font-bold mb-2">${step.title}</label>
-                    <div class="grid grid-cols-1 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[330px] overflow-y-auto pr-1">
             `;
             
             step.options.forEach(opt => {
