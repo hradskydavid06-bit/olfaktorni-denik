@@ -1635,19 +1635,31 @@
 
                 // 2. Jaké je počasí (Seasons)
                 if (q2 === 'summer') {
-                    if (perfume.seasons.includes('Summer')) score += 30;
+                    if (perfume.seasons.includes('Summer')) {
+                        score += 30;
+                    } else {
+                        score -= 80; // Silná penalizace pro nesummer vůně v létě
+                    }
                     const heavyNotes = ['vanilla', 'tobacco', 'oud', 'caramel', 'praline', 'leather', 'cinnamon', 'hřebíček'];
                     const hasHeavy = perfume.notes.some(n => heavyNotes.includes(n.toLowerCase()));
-                    if (hasHeavy) score -= 35;
+                    if (hasHeavy) score -= 50; // Zvýšená penalizace pro těžké složky v létě
                 } else if (q2 === 'winter') {
-                    if (perfume.seasons.includes('Winter')) score += 30;
+                    if (perfume.seasons.includes('Winter')) {
+                        score += 30;
+                    } else {
+                        score -= 60; // Silná penalizace pro zimní nevhodné vůně v zimě
+                    }
                     const winterNotes = ['vanilla', 'tobacco', 'oud', 'cinnamon', 'leather', 'dates', 'cacao', 'rum'];
                     const hasWinter = perfume.notes.some(n => winterNotes.includes(n.toLowerCase()));
                     if (hasWinter) score += 20;
                 } else if (q2 === 'spring') {
-                    if (perfume.seasons.includes('Spring') || perfume.seasons.includes('All-year')) score += 25;
+                    if (perfume.seasons.includes('Spring') || perfume.seasons.includes('All-year')) {
+                        score += 25;
+                    } else {
+                        score -= 15; // Mírná penalizace pro mimosezónní vůně na jaře
+                    }
                 } else if (q2 === 'rain') {
-                    if (perfume.seasons.includes('Autumn') || perfume.vibes.includes('dark')) score += 20;
+                    if (perfume.seasons.includes('Autumn') || perfume.vibes.includes('dark')) score += 25;
                 }
 
                 // 3. Dojem (Vibes)
