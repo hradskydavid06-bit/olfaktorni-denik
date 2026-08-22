@@ -1688,10 +1688,9 @@
 
             scores.sort((a, b) => b.score - a.score);
 
-            const primary = scores[0].perfume;
-            const secondary = scores[1].perfume;
+            const top3 = scores.slice(0, 3).map(s => s.perfume);
 
-            renderAdvisorResults(primary, secondary);
+            renderAdvisorResults(top3);
         }
 
         function highlightPerfumeCard(id) {
@@ -1723,7 +1722,7 @@
             }
         }
 
-        function renderAdvisorResults(primary, secondary) {
+        function renderAdvisorResults(perfumes) {
             const resultsContainer = document.getElementById('advisor-results');
             if (!resultsContainer) return;
 
@@ -1733,55 +1732,106 @@
             const q4 = wizardAnswers.q4;
             const q5 = wizardAnswers.q5;
 
-            // Slovníky pro generování textového odůvodnění
+            // Slovník pro překlad a vizualizaci stylů (vibes) s emotikony
+            const vibeEmojiMap = {
+                clean: '🧼 Čistá',
+                dark: '🌙 Temná',
+                sweet: '🪵 Sladká / Gurmánská',
+                professional: '💼 Profesionální',
+                dominant: '👑 Dominantní',
+                office: '👔 Kancelářská',
+                date: '🥂 Rande',
+                gym: '👟 Sportovní',
+                evening: '🍸 Večerní',
+                leisure: '☀️ Volnočasová',
+                formal: '🤵 Formální'
+            };
+
+            // Slovníky pro textový popis nahoře
             const occMap = {
-                office: 'pracovní den v kanceláři, kdy potřebujete působit elegantně, čistě a nerušivě',
-                date: 'rande nebo romantické setkání, kde oceníte intimnější, svůdnou a přitažlivou auru',
-                leisure: 'volnočasové aktivity a neformální setkání, kdy chcete vonět uvolněně a v naprosté pohodě',
-                gym: 'sport, návštěvu gymu a fyzickou aktivitu, kde zazáří její energetický a osvěžující náboj',
-                evening: 'večerní kluby, párty a společenské akce, kde chcete okamžitě vystoupit z davu a zaujmout',
-                formal: 'formální nebo slavnostní příležitosti vyžadující nejvyšší úroveň důstojnosti a nobility'
+                office: 'kancelář',
+                date: 'rande',
+                leisure: 'volný čas',
+                gym: 'sport',
+                evening: 'večer / klub',
+                formal: 'formální akce'
             };
 
             const weatherMap = {
-                summer: 'horkého letního počasí. Její odlehčená kompozice se v teple krásně rozvine a osvěží vás, aniž by dusila okolí',
-                spring: 'příjemného přechodného období jara či podzimu, kdy excelentně vyvažuje svěží i hřejivé polohy',
-                winter: 'mrazivého zimního dne, jehož chladný vzduch dá krásně vyniknout jejím hlubším, plnějším a bohatším akordům',
-                rain: 'deštivého a sychravého dne, do kterého přináší buď povzbuzující jiskru, nebo hřejivou pocitovou útulnost'
+                summer: 'léto',
+                spring: 'jaro / přechodné dny',
+                winter: 'zima',
+                rain: 'déšť'
             };
 
-            const vibeMap = {
-                clean: 'čistoty, svěžesti a jemného mýdlového základu',
-                dark: 'tajemna, hloubky, kouře a těžších vzácných pryskyřic',
-                sweet: 'gurmánské sladkosti, vanilkového pokušení a karamelu',
-                professional: 'seriózní elegance, uhlazenosti a naprosté profesionality',
-                dominant: 'sebevědomí, dominance a nekompromisního luxusu'
-            };
+            let cardsHtml = '';
+            perfumes.forEach((perfume, index) => {
+                // Překlad vibes na štítky
+                const vibeBadges = perfume.vibes.map(v => {
+                    const label = vibeEmojiMap[v] || v;
+                    return `<span class="inline-block text-[9px] font-bold px-2 py-0.5 rounded-md bg-amber-500/5 text-amber-300/90 border border-amber-500/15">${label}</span>`;
+                }).join(' ');
 
-            const styleMap = {
-                casual: 'volnočasového oblečení (tričko, džíny, svetr)',
-                shirt: 'Smart Casual stylu (košile, sako bez kravaty)',
-                suit: 'formálního obleku či společenského smokingu',
-                sporty: 'sportovního a pohodlného oděvu'
-            };
+                // Zvýraznění první karty jako absolutního vítěze
+                const isFirst = (index === 0);
 
-            const accordMap = {
-                any: 'všestranný vonný profil',
-                citrus: 'jiskřivé a svěží citrusové tóny',
-                wood: 'hluboké akordy vzácných dřev',
-                sweet: 'hřejivé tóny vanilky a gurmánských sladkostí',
-                spicy: 'hřejivou a lákavou kořenitost',
-                leather: 'luxusní charakter kůže a jemného semiše'
-            };
+                cardsHtml += `
+                    <div class="${isFirst ? 'bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/20 border-amber-500/40 gold-border-glow' : 'bg-zinc-900/80 border-zinc-800/80'} rounded-2xl p-5 border space-y-4 relative flex flex-col justify-between">
+                        ${isFirst ? `
+                        <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-zinc-950 text-[9px] uppercase font-extrabold tracking-widest px-3 py-1 rounded-bl-xl shadow-md">
+                            Top Match
+                        </div>` : ''}
 
-            const reasonText = `Tato vůně byla vybrána jako váš osobní podpis pro **${occMap[q1] || q1}** během **${weatherMap[q2] || q2}**. Její charakter skvěle podporuje váš záměr zanechat dojem **${vibeMap[q3] || q3}** a skvěle doplňuje vaši volbu **${styleMap[q4] || q4}**. Vaše preference pro **${accordMap[q5] || q5}** je v této kompozici excelentně zastoupena.`;
+                        <div class="space-y-2 flex-1">
+                            <div class="flex items-center space-x-1.5 text-[10px] font-bold ${isFirst ? 'text-amber-400' : 'text-zinc-400'}">
+                                <span>DOPORUČENÍ #${index + 1}</span>
+                            </div>
+
+                            <div>
+                                <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block">${perfume.brand}</span>
+                                <h3 class="text-lg font-serif font-bold text-zinc-100 mt-0.5 ${isFirst ? 'gold-text-gradient' : ''}">${perfume.name}</h3>
+                                <span class="inline-block mt-1.5 text-[9px] font-bold px-2 py-0.5 rounded-full ${perfume.type === 'Niche' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'bg-blue-500/10 text-blue-300 border border-blue-500/20'}">${perfume.type}</span>
+                            </div>
+
+                            <!-- Vibes badges -->
+                            <div class="flex flex-wrap gap-1.5 pt-1.5">
+                                ${vibeBadges}
+                            </div>
+
+                            <p class="text-xs text-zinc-300 leading-relaxed pt-1.5 border-t border-zinc-800/60 mt-2">
+                                ${perfume.desc}
+                            </p>
+                        </div>
+
+                        <div class="space-y-3 pt-3 border-t border-zinc-800/40 mt-auto">
+                            <div class="bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800 text-xs">
+                                <span class="text-zinc-500 block text-[9px] uppercase tracking-wider">Hlavní složky</span>
+                                <span class="text-zinc-200 font-medium truncate block" title="${perfume.notes.join(', ')}">${perfume.notes.join(', ')}</span>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button onclick="highlightPerfumeCard('${perfume.id}')" class="px-3 py-2.5 bg-zinc-950 hover:bg-zinc-900 text-zinc-450 hover:text-zinc-200 font-semibold rounded-xl text-xs transition-all border border-zinc-800 flex items-center justify-center" title="Najít ve sbírce">
+                                    <i data-lucide="search" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="recommendLayering('${perfume.id}')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center space-x-1 shadow-md shadow-amber-500/10">
+                                    <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                                    <span>Vrstvit</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
 
             resultsContainer.innerHTML = `
                 <!-- Header with Shuffle/Reload button -->
-                <div class="flex items-center justify-between bg-zinc-900/60 p-4 rounded-2xl border border-zinc-800/80 mb-2">
+                <div class="flex items-center justify-between bg-zinc-900/60 p-4 rounded-2xl border border-zinc-800/80">
                     <div class="flex items-center space-x-2">
                         <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 animate-pulse"></i>
-                        <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Doporučené vůně</span>
+                        <div>
+                            <span class="text-xs font-bold text-zinc-200 uppercase tracking-wider block">Tvé vonné trio pro dnešek</span>
+                            <span class="text-[10px] text-zinc-400 block mt-0.5">Styl: ${occMap[q1] || q1} / Počasí: ${weatherMap[q2] || q2}</span>
+                        </div>
                     </div>
                     <button onclick="liveAdvisorCalculate()" class="px-3 py-1.5 bg-zinc-950 hover:bg-zinc-900 text-amber-400 hover:text-amber-300 border border-zinc-850 rounded-xl text-[10px] sm:text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
@@ -1789,76 +1839,11 @@
                     </button>
                 </div>
 
-                <!-- PRIMARY RECOMMENDATION CARD -->
-                <div class="bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/30 rounded-2xl p-6 border border-amber-500/40 gold-border-glow space-y-4 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-zinc-950 text-[10px] uppercase font-bold tracking-widest px-4 py-1 rounded-bl-xl shadow-md">
-                        100% Doporučená Volba
-                    </div>
-
-                    <div class="flex items-center space-x-2 text-xs font-semibold text-amber-400">
-                        <i data-lucide="crown" class="w-4 h-4"></i>
-                        <span>HLAVNÍ DOPORUČENÍ</span>
-                    </div>
-
-                    <div>
-                        <span class="text-xs uppercase tracking-widest text-zinc-400 font-medium">${primary.brand}</span>
-                        <h3 class="text-2xl font-serif font-bold text-zinc-100 mt-0.5 gold-text-gradient">${primary.name}</h3>
-                        <span class="inline-block mt-2 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${primary.type === 'Niche' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'bg-blue-500/10 text-blue-300 border border-blue-500/30'}">${primary.type} Collection</span>
-                    </div>
-
-                    <p class="text-xs text-zinc-300 bg-zinc-950/60 p-3.5 rounded-xl border border-zinc-800/85 leading-relaxed">
-                        ${reasonText}
-                    </p>
-
-                    <div class="grid grid-cols-2 gap-3 pt-1">
-                        <div class="bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800 text-xs">
-                            <span class="text-zinc-500 block text-[9px] uppercase">Hlavní složky</span>
-                            <span class="text-zinc-200 font-medium truncate block">${primary.notes.join(', ')}</span>
-                        </div>
-                        <div class="bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800 text-xs">
-                            <span class="text-zinc-500 block text-[9px] uppercase">Projekce & Výdrž</span>
-                            <span class="text-amber-400 font-bold">${primary.longevity}/10 Longevity</span>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-2 pt-2">
-                        <button onclick="highlightPerfumeCard('${primary.id}')" class="flex-1 bg-zinc-950 hover:bg-zinc-900 text-zinc-350 hover:text-zinc-200 font-semibold py-3 rounded-xl text-xs transition-all flex items-center justify-center space-x-1.5 border border-zinc-800">
-                            <i data-lucide="search" class="w-4 h-4"></i>
-                            <span>Najít ve sbírce</span>
-                        </button>
-                        <button onclick="recommendLayering('${primary.id}')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold py-3 rounded-xl text-xs transition-all flex items-center justify-center space-x-1.5 shadow-md shadow-amber-500/10">
-                            <i data-lucide="layers" class="w-4 h-4"></i>
-                            <span>Doporučit vrstvení</span>
-                        </button>
-                    </div>
+                <!-- 3-Column Grid for recommendations -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${cardsHtml}
                 </div>
-
-                <!-- SECONDARY / ALTERNATIVE RECOMMENDATION CARD -->
-                <div class="bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2 text-xs font-semibold text-zinc-400">
-                            <i data-lucide="shuffle" class="w-4 h-4 text-zinc-400"></i>
-                            <span>ALTERNATIVNÍ MOŽNOST</span>
-                        </div>
-                        <span class="text-[9px] text-zinc-500">Skvělá druhá volba</span>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-zinc-500">${secondary.brand}</span>
-                            <h4 class="text-base font-serif font-bold text-zinc-200">${secondary.name}</h4>
-                        </div>
-                        <div class="flex gap-1.5">
-                            <button onclick="highlightPerfumeCard('${secondary.id}')" title="Najít ve sbírce" class="p-2 bg-zinc-950 hover:bg-zinc-900 text-zinc-450 hover:text-zinc-200 border border-zinc-850 rounded-lg text-xs transition-all">
-                                <i data-lucide="search" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <button onclick="recommendLayering('${secondary.id}')" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-amber-300 rounded-xl text-xs font-medium border border-zinc-700 transition-all flex items-center gap-1">
-                                <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                                <span>Vrstvit</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
+            `;
 
             lucide.createIcons();
         }
