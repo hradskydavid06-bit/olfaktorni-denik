@@ -1129,6 +1129,21 @@
                 remainingMl: 100.0,
                 desc: 'Kontrastní, dřevitě-kořeněná vůně spojující ostrý černý pepř a chladné aldehydy s krémovým mléčným santalem a pižmem.',
                 favOccasion: 'Formální schůzky & Společnost'
+            },
+            {
+                id: 'mab-b683',
+                brand: 'Marc-Antoine Barrois',
+                name: 'B683',
+                type: 'Niche',
+                notes: ['Saffron', 'Black Pepper', 'Nutmeg', 'Violet Leaf', 'Leather', 'Patchouli', 'Sandalwood', 'Ambroxan'],
+                seasons: ['Autumn', 'Winter', 'Spring', 'All-year'],
+                vibes: ['professional', 'dark', 'dominant', 'formal'],
+                longevity: 9,
+                sillage: 8,
+                totalMl: 100,
+                remainingMl: 100.0,
+                desc: 'Moderní kožená a dřevitě-kořeněná kompozice s tóny šafránu, fialkových lístků a hřejivého santalu.',
+                favOccasion: 'Důležitá jednání, formální večery & chladné dny'
             }
         ];
 
@@ -1604,7 +1619,7 @@
                         if (perfume.sillage <= 7) score += 15;
                     }
                     if (sit === 'avant-garde') {
-                        const uniqueBrands = ['Floraïku', 'Neandertal', 'Les Bains Guerbois'];
+                        const uniqueBrands = ['Floraïku', 'Neandertal', 'Les Bains Guerbois', 'Marc-Antoine Barrois'];
                         if (uniqueBrands.includes(perfume.brand)) score += 20;
                         const mineralNotes = ['hinoki', 'galbanum', 'metallic', 'aldehydes', 'driftwood'];
                         if (perfume.notes.some(n => mineralNotes.includes(n.toLowerCase()))) score += 35;
